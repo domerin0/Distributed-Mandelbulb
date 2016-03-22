@@ -14,3 +14,10 @@ $(PROGRAM_NAME): main.o print.o timing.o savebmp.o getparams.o 3d.o getcolor.o d
 
 clean:
 	rm *.o $(PROGRAM_NAME) $(EXEEXT) *~
+
+video:
+	#change to frames folder and run script
+	@/bin/bash -c "  \
+	pushd ./frames;  \
+	./make_video.sh; \
+	popd;"
