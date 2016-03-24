@@ -1,16 +1,23 @@
 
 CC       =  g++
-FLAGS    = -O3 -Wall
+FLAGS    = -O3 -Wall -pg
 CFLAGS   = $(FLAGS)
 CXXFLAGS = $(FLAGS)
-LDFLAGS  = -lm 
+LDFLAGS  = -lm
 
 PROGRAM_NAME=mandelbox
 
-$(PROGRAM_NAME): main.o print.o timing.o savebmp.o getparams.o 3d.o getcolor.o distance_est.o \
+OBJS=main.o print.o timing.o savebmp.o getparams.o 3d.o getcolor.o distance_est.o \
 	mandelboxde.o raymarching.o renderer.o init3D.o
+
+$(PROGRAM_NAME): $(OBJS)
 	$(CC) -o $@ $? $(CFLAGS) $(LDFLAGS)
 
+
+omp: CFLAGS=-g -Wall -O2 -fopenmp
+omp: LDFLAGS=-fopenmp
+omp:$(OBJS)
+	$(CC) $(LDFLAGS) -o $(PROGRAM_NAME) $? -lgomp -lm
 
 clean:
 	rm *.o $(PROGRAM_NAME) $(EXEEXT) *~

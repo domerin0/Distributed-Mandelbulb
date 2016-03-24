@@ -3,7 +3,8 @@
 *.lo
 *.o
 *.obj
-
+mandelbox
+mandelbulb
 # Precompiled Headers
 *.gch
 *.pch
