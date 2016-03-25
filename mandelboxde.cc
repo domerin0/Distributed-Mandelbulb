@@ -36,7 +36,7 @@ double MandelBoxDE(const vec3 &p0, const MandelBoxParams &params, double c1, dou
   double rMin2   = SQR(params.rMin);
   double rFixed2 = SQR(params.rFixed);
   double escape  = SQR(params.escape_time);
-  double dfactor = 1; 
+  double dfactor = 1;
   double r2      =-1;
   const double rFixed2rMin2 = rFixed2/rMin2;
 
@@ -46,8 +46,8 @@ double MandelBoxDE(const vec3 &p0, const MandelBoxParams &params, double c1, dou
       COMPONENT_FOLD(p.x);
       COMPONENT_FOLD(p.y);
       COMPONENT_FOLD(p.z);
-      
-      r2 = p.Dot(p);      
+
+      r2 = p.Dot(p);
 
       if (r2<rMin2)
 	{
@@ -55,20 +55,18 @@ double MandelBoxDE(const vec3 &p0, const MandelBoxParams &params, double c1, dou
 	  dfactor *= (rFixed2rMin2);
 	}
       else
-      if ( r2<rFixed2) 
+      if ( r2<rFixed2)
 	{
 	  const double t = (rFixed2/r2);
 	  p = p*(rFixed2/r2);;
 	  dfactor *= t;
 	}
-      
 
-      dfactor = dfactor*fabs(params.scale)+1.0;      
+
+      dfactor = dfactor*fabs(params.scale)+1.0;
       p = p*params.scale+p0;
       i++;
     }
-  
+
   return  (p.Magnitude() - c1) / dfactor - c2;
 }
-
-

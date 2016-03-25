@@ -1,6 +1,6 @@
 
-CC       =  g++
-FLAGS    = -O3 -Wall -pg
+CC=gcc
+FLAGS    = -O2 -Wall
 CFLAGS   = $(FLAGS)
 CXXFLAGS = $(FLAGS)
 LDFLAGS  = -lm
