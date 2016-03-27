@@ -25,6 +25,9 @@
 #include "renderer.h"
 #include "mandelbox.h"
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #define MAX_FRAMES 7200
 
@@ -40,6 +43,19 @@ MandelBoxParams mandelBox_params;
 
 int main(int argc, char** argv)
 {
+	// adapted from:
+	//http://stackoverflow.com/questions/9314586/c-faster-way-to-check-if-a-directory-exists
+	struct stat s;
+	int err = stat("/path/to/frames", &s);
+	if(-1 == err) {
+  	mkdir("frames", 0700);	
+		} else {
+    	if(S_ISDIR(s.st_mode)) {
+        	/* it's a dir */
+    	} else {
+        	/* exists but is no dir */
+    	}
+		}
 	assert(argc >= 2);
 	char* path;
 	if (argc == 3){
