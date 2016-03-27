@@ -21,3 +21,10 @@ omp:$(OBJS)
 
 clean:
 	rm *.o $(PROGRAM_NAME) $(EXEEXT) *~
+
+video:
+	#change to frames folder and run script
+	@/bin/bash -c "  \
+	pushd ./frames;  \
+	./make_video.sh; \
+	popd;"
