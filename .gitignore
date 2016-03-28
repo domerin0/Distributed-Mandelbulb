@@ -13,7 +13,7 @@ frames/*
 *.so
 *.dylib
 *.dll
-
+*.DS_STORE
 # Fortran module files
 *.mod
 
