@@ -48,7 +48,7 @@ double MandelBoxDE(const vec3 &p0, const MandelBoxParams &params, double c1, dou
       COMPONENT_FOLD(p.z);
 
 
-      DOT(r2, p);
+      DOT(r2, p, p);
       //r2 = p.Dot(p);
 
       if (r2<rMin2)
@@ -68,13 +68,13 @@ double MandelBoxDE(const vec3 &p0, const MandelBoxParams &params, double c1, dou
 
 
       dfactor = dfactor*fabs(params.scale)+1.0;
-      vec3 p1;
-      ADD_DOUBLE(p1, p0, params.scale);
-      MULT_VEC(p, p, p1);
+      //vec3 p1;
+      MULT_DOUBLE(p, p, params.scale);
+      ADD_POINT(p, p, p0);
       //p = p*params.scale+p0;
       i++;
     }
-    double mag = 0.0;
+  double mag = 0.0;
   MAGNITUDE(mag, p);
   return  (mag - c1) / dfactor - c2;
 }

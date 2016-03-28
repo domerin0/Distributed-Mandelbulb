@@ -41,7 +41,7 @@ void lighting(const vec3 &n, const vec3 &color, const vec3 &pos, const vec3 &dir
   SUBTRACT_POINT_DOUBLE(nn, n, 1.0);
   //vec3 nn = n -1.0;
   double d = 0.0;
-  DOT(d, direction);
+  DOT(d, direction, nn);
   double ambient = MAX(CamLightMin, d) * CamLightW;
   //double ambient = max( CamLightMin, nn.Dot(direction) )*CamLightW;
   MULT_DOUBLE(outV, CamLight, ambient);

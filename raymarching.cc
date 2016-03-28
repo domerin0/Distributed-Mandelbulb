@@ -31,6 +31,7 @@ void normal (const vec3 & p, vec3 & normal);
 void rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  &direction, double eps,
 	      pixelData& pix_data)
 {
+
   double dist = 0.0;
   double totalDist = 0.0;
 
@@ -39,12 +40,14 @@ void rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  &
   double epsModified = 0.0;
 
   int steps=0;
-  vec3 p;
+  vec3 p, tempDir;
   do
     {
-			vec3 tempDir;
 			MULT_DOUBLE(tempDir, direction, totalDist);
+			//printf("tempDir x = %f, y = %f, z = %f\n", tempDir.x, tempDir.y, tempDir.z);
 			ADD_POINT(p, from, tempDir);
+			//printf("p x = %f, y = %f, z = %f\n", p.x, p.y, p.z);
+
 			//p = from + direction * totalDist;
       dist = DE(p);
 

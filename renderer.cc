@@ -37,7 +37,6 @@ void renderFractal(const CameraParams &camera_params, const RenderParams &render
 		   unsigned char* image)
 {
 
-
   const double eps = pow(10.0, renderer_params.detail);
   double farPoint[3];
   vec3 to, from;
@@ -76,10 +75,8 @@ void renderFractal(const CameraParams &camera_params, const RenderParams &render
 
 	  //render the pixel
 	  rayMarch(renderer_params, from, to, eps, pix_data);
-
 	  //get the colour at this pixel
 	  color = getColour(pix_data, renderer_params, from, to);
-
 	  //save colour into texture
 	  k = (j * width + i)*3;
 	  image[k+2] = (unsigned char)(color.x * 255);
@@ -88,5 +85,4 @@ void renderFractal(const CameraParams &camera_params, const RenderParams &render
 	}
       printProgress((j+1)/(double)height,getTime()-time1);
     }
-  printf("\n rendering done:\n");
 }

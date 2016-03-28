@@ -9,7 +9,6 @@
 #include <math.h>
 #endif
 
-
 typedef struct
 {
   double x, y, z;
@@ -83,7 +82,7 @@ typedef struct
 
 #define MAGNITUDE(m,p) 	({ m=sqrt( p.x*p.x + p.y*p.y + p.z*p.z ); })
 
-#define DOT(d,p) {  d=( p.x*p.x + p.y*p.y + p.z*p.z ); }
+#define DOT(d,p, v) {  d=( p.x*v.x + p.y*v.y + p.z*v.z ); }
 
 #define MAX(a,b) ( ((a)>(b))? (a):(b))
 

@@ -48,7 +48,7 @@ int main(int argc, char** argv)
 	struct stat s;
 	int err = stat("/path/to/frames", &s);
 	if(-1 == err) {
-  	mkdir("frames", 0700);	
+  	mkdir("frames", 0700);
 		} else {
     	if(S_ISDIR(s.st_mode)) {
         	/* it's a dir */
@@ -75,6 +75,7 @@ int main(int argc, char** argv)
 	char frame_name[256];
 
 	getParameters(argv[1], &camera_path[0], &renderer_params, &mandelBox_params);
+
 	getPath(path, camera_path, &nframes);
 
 
