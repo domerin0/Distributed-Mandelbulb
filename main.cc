@@ -24,6 +24,12 @@
 #include "camera.h"
 #include "renderer.h"
 #include "mandelbox.h"
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+#define MAX_FRAMES 7200
 
 #define MAX_FRAMES 7200
 
@@ -39,7 +45,30 @@ MandelBoxParams mandelBox_params;
 
 int main(int argc, char** argv)
 {
-	assert(argc == 3);
+	// adapted from:
+	//http://stackoverflow.com/questions/9314586/c-faster-way-to-check-if-a-directory-exists
+	struct stat s;
+	int err = stat("/path/to/frames", &s);
+	if(-1 == err) {
+  	mkdir("frames", 0700);
+		} else {
+    	if(S_ISDIR(s.st_mode)) {
+        	/* it's a dir */
+    	} else {
+        	/* exists but is no dir */
+    	}
+		}
+	assert(argc >= 2);
+	char* path;
+	if (argc == 3){
+		path = (char*)malloc(sizeof(char) * (strlen(argv[2]) + 1));
+		memcpy(path, argv[2], strlen(argv[2]) + 1);
+		printf("%s\n", path);
+	}else{
+		path = (char*)malloc(sizeof(char) * (strlen("path.dat") + 1));
+		sprintf(path, "path.dat");
+		printf("%s\n", path);
+	}
 
 	RenderParams renderer_params;
 	CameraParams *camera_path = (CameraParams*)malloc(MAX_FRAMES*sizeof(CameraParams));
@@ -48,26 +77,25 @@ int main(int argc, char** argv)
 	char frame_name[256];
 
 	getParameters(argv[1], &camera_path[0], &renderer_params, &mandelBox_params);
-	getPath(argv[2], camera_path, &nframes);
+
+	getPath(path, camera_path, &nframes);
 
 
 	int image_size = renderer_params.width * renderer_params.height;
 	unsigned char *image = (unsigned char*)malloc(3*image_size*sizeof(unsigned char));
 
-
 	for (int i = 0; i < nframes; ++i){
 
 		init3D(&camera_path[i], &renderer_params);
 		renderFractal(camera_path[i], renderer_params, image);
-		
+
 		//TODO create render directory from input
-		//TODO create starting name from number from input (in case of previously generated frames)  
-		snprintf(frame_name, sizeof(char) * 256, "./frames/frame_%04d.bmp", i); 
+		//TODO create starting name from number from input (in case of previously generated frames)
+		snprintf(frame_name, sizeof(char) * 256, "./frames/frame_%04d.bmp", i);
 		saveBMP(frame_name, image, renderer_params.width, renderer_params.height);
 
 	}
-	
-	
+
 	free(image);
 
 	return 0;

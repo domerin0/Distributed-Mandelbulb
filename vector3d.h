@@ -9,7 +9,6 @@
 #include <math.h>
 #endif
 
-
 typedef struct
 {
   double x, y, z;
@@ -22,6 +21,20 @@ typedef struct
   p.x=(v.x)-(u.x);				\
   p.y=(v.y)-(u.y);				\
   p.z=(v.z)-(u.z);				\
+}
+
+#define ADD_POINT(p,v,u)			\
+  {						\
+  p.x=(v.x)+(u.x);				\
+  p.y=(v.y)+(u.y);				\
+  p.z=(v.z)+(u.z);				\
+}
+
+#define SUBTRACT_POINT_DOUBLE(p,v,u)			\
+  {						\
+  p.x=(v.x)-(u);				\
+  p.y=(v.y)-(u);				\
+  p.z=(v.z)-(u);				\
 }
 
 #define ADD_DOUBLE(p,v,d)\
@@ -68,7 +81,7 @@ typedef struct
 
 #define MAGNITUDE(m,p) 	({ m=sqrt( p.x*p.x + p.y*p.y + p.z*p.z ); })
 
-#define DOT(d,p) {  d=( p.x*p.x + p.y*p.y + p.z*p.z ); }
+#define DOT(d,p, v) {  d=( p.x*v.x + p.y*v.y + p.z*v.z ); }
 
 #define MAX(a,b) ( ((a)>(b))? (a):(b))
 

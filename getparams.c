@@ -34,30 +34,30 @@ void getParameters(char *filename, CameraParams *camP, RenderParams *renP, Mande
 	FILE *fp;
 	int ret;
 	double *d;
-	
+
 	renP->fractalType = 0;
 	renP->maxRaySteps = 8000;
 	renP->maxDistance = 1000;
 
 	fp = fopen(filename,"r");
-	
-	if( !fp ) 
+
+	if( !fp )
 		{
 			printf(" *** File %s does not exist\n", filename);
 			exit(1);
 		}
-	
+
 	int count = 0;
-	
+
 	while (1){
 		memset(buf, 0, BUF_SIZE);
-		
+
 		ret = fscanf(fp, "%1023[^\n]\n", buf);
 		if (ret == EOF) break;
-		
+
 		if(buf[0] == '#') // comment line
 		continue;
-			
+
 		switch(count){
 			//IMAGE
 			//width, height
@@ -78,7 +78,7 @@ void getParameters(char *filename, CameraParams *camP, RenderParams *renP, Mande
 				sscanf(buf, "%d %f ", &boxP->num_iter, &boxP->escape_time);
 				break;
 
-			//COLORING 
+			//COLORING
 			case 4:
 				sscanf(buf, "%d", &renP->colourType);
 				break;
@@ -95,4 +95,3 @@ void getParameters(char *filename, CameraParams *camP, RenderParams *renP, Mande
 	}
 	fclose(fp);
 }
-

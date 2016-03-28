@@ -8,12 +8,12 @@ mandelbulb
 # Precompiled Headers
 *.gch
 *.pch
-
+frames/*
 # Compiled Dynamic libraries
 *.so
 *.dylib
 *.dll
-
+*.DS_STORE
 # Fortran module files
 *.mod
 

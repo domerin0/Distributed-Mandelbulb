@@ -1,5 +1,4 @@
-
-CC=gcc
+CC=g++
 FLAGS    = -O2 -Wall
 CFLAGS   = $(FLAGS)
 CXXFLAGS = $(FLAGS)

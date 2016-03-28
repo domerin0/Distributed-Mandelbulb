@@ -38,14 +38,15 @@ static const vec3 backColor = {.x=0.4,.y=0.4,.z=0.4};
 void lighting(const vec3 &n, const vec3 &color, const vec3 &pos, const vec3 &direction,  vec3 &outV)
 {
   vec3 nn;
-  SUBTRACT_POINT(nn, n, 1.0);
+
+  SUBTRACT_POINT_DOUBLE(nn, n, 1.0);
   //vec3 nn = n -1.0;
-  double d;
-  DOT(d, direction);
-  double ambient = max(CamLightMin, d) * CamLightW;
+  double d = 0.0;
+  DOT(d, direction, nn);
+  double ambient = MAX(CamLightMin, d) * CamLightW;
   //double ambient = max( CamLightMin, nn.Dot(direction) )*CamLightW;
   MULT_DOUBLE(outV, CamLight, ambient);
-  MULT_DOUBLE(outV, outV, color);
+  MULT_VEC(outV, outV, color);
   //outV = CamLight*ambient*color;
 }
 

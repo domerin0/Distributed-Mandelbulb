@@ -47,26 +47,33 @@ double MandelBoxDE(const vec3 &p0, const MandelBoxParams &params, double c1, dou
       COMPONENT_FOLD(p.y);
       COMPONENT_FOLD(p.z);
 
-      r2 = p.Dot(p);
+      DOT(r2, p, p);
+      //r2 = p.Dot(p);
 
       if (r2<rMin2)
 	{
-	  p = p*(rFixed2rMin2);
+    MULT_DOUBLE(p, p, rFixed2rMin2);
+	  //p = p*(rFixed2rMin2);
 	  dfactor *= (rFixed2rMin2);
 	}
       else
       if ( r2<rFixed2)
 	{
 	  const double t = (rFixed2/r2);
-	  p = p*(rFixed2/r2);;
+    MULT_DOUBLE(p, p, rFixed2/r2);
+    //p = p*(rFixed2/r2);;
 	  dfactor *= t;
 	}
 
-
       dfactor = dfactor*fabs(params.scale)+1.0;
-      p = p*params.scale+p0;
+
+      //vec3 p1;
+      MULT_DOUBLE(p, p, params.scale);
+      ADD_POINT(p, p, p0);
+      //p = p*params.scale+p0;
       i++;
     }
-
-  return  (p.Magnitude() - c1) / dfactor - c2;
+  double mag = 0.0;
+  MAGNITUDE(mag, p);
+  return  (mag - c1) / dfactor - c2;
 }
