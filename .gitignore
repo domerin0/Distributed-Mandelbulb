@@ -8,7 +8,7 @@ mandelbulb
 # Precompiled Headers
 *.gch
 *.pch
-
+frames/*
 # Compiled Dynamic libraries
 *.so
 *.dylib
