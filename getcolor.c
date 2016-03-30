@@ -28,8 +28,8 @@
 
 //---lightning and colouring---------
 static vec3 CamLight = {.x=1.0,.y=1.0,.z=1.0};
-static double CamLightW = 1.8;// 1.27536;
-static double CamLightMin = 0.3;// 0.48193;
+static float CamLightW = 1.8;// 1.27536;
+static float CamLightMin = 0.3;// 0.48193;
 //-----------------------------------
 static const vec3 baseColor = {.x=1.0, .y=1.0, .z=1.0};
 static const vec3 backColor = {.x=0.4,.y=0.4,.z=0.4};
@@ -39,13 +39,13 @@ void lighting(const vec3 &n, const vec3 &color, const vec3 &pos, const vec3 &dir
 {
   vec3 nn;
 
-  SUBTRACT_POINT_DOUBLE(nn, n, 1.0);
+  SUBTRACT_POINT_FLOAT(nn, n, 1.0);
   //vec3 nn = n -1.0;
-  double d = 0.0;
+  float d = 0.0;
   DOT(d, direction, nn);
-  double ambient = MAX(CamLightMin, d) * CamLightW;
-  //double ambient = max( CamLightMin, nn.Dot(direction) )*CamLightW;
-  MULT_DOUBLE(outV, CamLight, ambient);
+  float ambient = MAX(CamLightMin, d) * CamLightW;
+  //float ambient = max( CamLightMin, nn.Dot(direction) )*CamLightW;
+  MULT_FLOAT(outV, CamLight, ambient);
   MULT_VEC(outV, outV, color);
   //outV = CamLight*ambient*color;
 }
@@ -57,35 +57,35 @@ vec3 getColour(const pixelData &pixData, const RenderParams &render_params,
   vec3 hitColor = baseColor;
 
   if (pixData.escaped == false)
+  {
+    //apply lighting
+    lighting(pixData.normal, hitColor, pixData.hit, direction, hitColor);
+
+    //add normal based colouring
+    if(render_params.colourType == 0 || render_params.colourType == 1)
     {
-      //apply lighting
-      lighting(pixData.normal, hitColor, pixData.hit, direction, hitColor);
+      MULT_VEC(hitColor, hitColor, pixData.normal);
+      ADD_FLOAT(hitColor, hitColor, 1.0);
+      MULT_FLOAT(hitColor, hitColor, 0.5);
+      //hitColor = hitColor * pixData.normal;
+      //hitColor = (hitColor + 1.0)/2.0;
+      MULT_FLOAT(hitColor, hitColor, render_params.brightness);
+      //hitColor = hitColor*render_params.brightness;
 
-      //add normal based colouring
-      if(render_params.colourType == 0 || render_params.colourType == 1)
-	{
-    MULT_VEC(hitColor, hitColor, pixData.normal);
-    ADD_DOUBLE(hitColor, hitColor, 1.0);
-    MULT_DOUBLE(hitColor, hitColor, 0.5);
-	  //hitColor = hitColor * pixData.normal;
-	  //hitColor = (hitColor + 1.0)/2.0;
-    MULT_DOUBLE(hitColor, hitColor, render_params.brightness);
-	  //hitColor = hitColor*render_params.brightness;
-
-	  //gamma correction
-	  CLAMP(hitColor, 0.0, 1.0);
-    //clamp(hitColor, 0.0, 1.0);
-    MULT_VEC(hitColor, hitColor, hitColor);
-	  //hitColor = hitColor*hitColor;
-	}
-      if(render_params.colourType == 1)
-	{
-	  //"swap" colors
-	  double t = hitColor.x;
-	  hitColor.x = hitColor.z;
-	  hitColor.z = t;
-	}
+      //gamma correction
+      CLAMP(hitColor, 0.0, 1.0);
+      //clamp(hitColor, 0.0, 1.0);
+      MULT_VEC(hitColor, hitColor, hitColor);
+      //hitColor = hitColor*hitColor;
     }
+    if(render_params.colourType == 1)
+    {
+      //"swap" colors
+      float t = hitColor.x;
+      hitColor.x = hitColor.z;
+      hitColor.z = t;
+    }
+  }
   else
     //we have the background colour
     hitColor = backColor;

@@ -11,7 +11,7 @@
 
 typedef struct
 {
-  double x, y, z;
+  float x, y, z;
 }  vec3;
 
 #define SET_POINT(p,v) { p.x=v.x; p.y=v.y; p.z=v.z; }
@@ -31,10 +31,15 @@ typedef struct
 }
 
 #define SUBTRACT_POINT_DOUBLE(p,v,u)			\
-  {						\
+{						\
   p.x=(v.x)-(u);				\
   p.y=(v.y)-(u);				\
   p.z=(v.z)-(u);				\
+}
+
+#define SUBTRACT_POINT_FLOAT(p,v,u)			\
+{						\
+  SUBTRACT_POINT_DOUBLE(p, v, u)				\
 }
 
 #define ADD_DOUBLE(p,v,d)\
@@ -44,11 +49,21 @@ typedef struct
   p.z=(v.z) + d;\
 }
 
+#define ADD_FLOAT(p,v,d)\
+{\
+  ADD_DOUBLE(p, v, d)\
+}
+
 #define MULT_DOUBLE(p, v, d)\
 {\
   p.x=(v.x) * d;\
   p.y=(v.y) * d;\
   p.z=(v.z) * d;\
+}
+
+#define MULT_FLOAT(p, v, d)\
+{\
+  MULT_DOUBLE(p, v, d)\
 }
 
 #define MULT_VEC(p , v, u)\
@@ -59,10 +74,10 @@ typedef struct
 }
 
 #define NORMALIZE(p) {					\
-    double fMag = ( p.x*p.x + p.y*p.y + p.z*p.z );	\
+    float fMag = ( p.x*p.x + p.y*p.y + p.z*p.z );	\
     if (fMag != 0)					\
       {							\
-	double fMult = 1.0/sqrt(fMag);			\
+	float fMult = 1.0/sqrtf(fMag);			\
 	p.x *= fMult;					\
 	p.y *= fMult;					\
 	p.z *= fMult;					\
@@ -79,7 +94,7 @@ typedef struct
   v.z = v.z>max?max:v.z;\
 }
 
-#define MAGNITUDE(m,p) 	({ m=sqrt( p.x*p.x + p.y*p.y + p.z*p.z ); })
+#define MAGNITUDE(m,p) 	({ m=sqrtf( p.x*p.x + p.y*p.y + p.z*p.z ); })
 
 #define DOT(d,p, v) {  d=( p.x*v.x + p.y*v.y + p.z*v.z ); }
 

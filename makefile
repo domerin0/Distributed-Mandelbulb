@@ -1,5 +1,5 @@
 CC=g++
-FLAGS    = -O2 -Wall
+FLAGS    = -O2 -Wall -fopenmp
 CFLAGS   = $(FLAGS)
 CXXFLAGS = $(FLAGS)
 LDFLAGS  = -lm
