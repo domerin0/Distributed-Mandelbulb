@@ -1,0 +1,17 @@
+# IMAGE
+# width height
+800 600
+# detail level, the smaller the more detailed (-3)
+-3
+# MANDELBOX
+# n/a, rMin (bailout), rFixed (power) (0 4.0 8)
+0  4.0 8
+# max number of iterations, escape time
+100 0
+# COLORING
+# type 0 or 1
+1
+# brightness
+1.2
+# IMAGE FILE NAME
+image

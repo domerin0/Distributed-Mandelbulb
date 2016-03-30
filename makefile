@@ -7,7 +7,7 @@ LDFLAGS  = -lm
 PROGRAM_NAME=mandelbox
 
 OBJS=main.o print.o timing.o savebmp.o getparams.o getpath.o 3d.o getcolor.o distance_est.o \
-	mandelboxde.o raymarching.o renderer.o init3D.o
+	mandelboxde.o raymarching.o renderer.o init3D.o mandelbulb_dist_est.o
 
 $(PROGRAM_NAME): $(OBJS)
 	$(CC) -o $@ $? $(CFLAGS) $(LDFLAGS)

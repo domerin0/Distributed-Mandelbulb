@@ -1,3 +1,4 @@
+
 /*
    This file is part of the Mandelbox program developed for the course
     CS/SE  Distributed Computer Systems taught by N. Nedialkov in the
@@ -18,20 +19,53 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "vector3d.h"
+#include "color.h"
 #include "mandelbox.h"
+#ifdef _OPENACC
+#include <accelmath.h>
+#else
+#include <math.h>
+#endif
 
-extern MandelBoxParams mandelBox_params;
-extern double MandelBoxDE(const vec3 &pos, const MandelBoxParams &mPar, double c1, double c2);
-extern double MandelBulbDistanceEstimator(const vec3 &p0, const MandelBoxParams &params);
 
-//Distance Estimator Field Selector
-double DE(const vec3 &p)
+
+double MandelBulbDistanceEstimator(const vec3 &p0, const MandelBoxParams &params)
 {
-  //double c1 = fabs(mandelBox_params.scale - 1.0);
-  //double c2 = pow( fabs(mandelBox_params.scale), 1 - mandelBox_params.num_iter);
-  //double d = MandelBoxDE(p, mandelBox_params, c1, c2);
-  //return d;
+  vec3 z;
+  z = p0;
+  
+  double dr = 1.0;
+  double r = 0.0;
 
-  return MandelBulbDistanceEstimator(p, mandelBox_params);
+  double Bailout = params.rMin;
+  double Power = params.rFixed;
+
+  for (int i=0; i < params.num_iter; i++) 
+    {
+      MAGNITUDE(r,z);
+      if(r > Bailout) break; 
+
+      double theta = acos(z.z/r);
+      double phi   = atan2(z.y, z.x);
+      dr = pow(r, Power - 1.0) * Power * dr + 1.0;
+
+      double zr = pow(r, Power);
+      theta     = theta * Power;
+      phi       = phi * Power;
+
+      z.x = zr*sin(theta)*cos(phi);
+      z.y = zr*sin(phi)*sin(theta);
+      z.z = zr*cos(theta);
+
+      z.x = z.x + p0.x;
+      z.y = z.y + p0.y;
+      z.z = z.z + p0.z;
+    }
+
+  return 0.5*log(r)*r/dr;
 }
+
+
+
+
+

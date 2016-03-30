@@ -6,7 +6,7 @@ void getPath(char *filename, CameraParams *path, int *len)
 {
 	FILE* fid;
 
-	fid = fopen("path.dat","r");
+	fid = fopen(filename,"r");
 	assert(fid != NULL);
 
 	int line = 0;
