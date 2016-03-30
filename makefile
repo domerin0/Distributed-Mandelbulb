@@ -1,23 +1,34 @@
+CC=pgc++
+#FLAGS    = -O2 -Wall
+#CFLAGS   = $(FLAGS)
+#CXXFLAGS = $(FLAGS)
+#LDFLAGS  = -lm
 
-CC       =  g++
-FLAGS    = -O3 -Wall -pg
-CFLAGS   = $(FLAGS)
-CXXFLAGS = $(FLAGS)
-LDFLAGS  = -lm
+PROGRAM_NAME=mandelbulb
 
-PROGRAM_NAME=mandelbox
-
-OBJS=main.o print.o timing.o savebmp.o getparams.o 3d.o getcolor.o distance_est.o \
-	mandelboxde.o raymarching.o renderer.o init3D.o
+OBJS=main.o print.o timing.o savebmp.o getparams.o getpath.o 3d.o getcolor.o distance_est.o \
+	mandelboxde.o raymarching.o renderer.o init3D.o mandelbulb_dist_est.o
 
 $(PROGRAM_NAME): $(OBJS)
 	$(CC) -o $@ $? $(CFLAGS) $(LDFLAGS)
 
 
-omp: CFLAGS=-g -Wall -O2 -fopenmp
-omp: LDFLAGS=-fopenmp
+acc: CFLAFGS=-fast -acc -Minfo -ta=tesla,cc50 -O2
+acc: LDFLAGS=-acc -ta=tesla,cc50
+acc: $(OBJS)
+	$(CC) $(LDFLAGS) -o$(PROGRAM_NAME) $? -lm
+
+omp: CFLAGS= -O2 -mp
+omp: LDFLAGS=-mp
 omp:$(OBJS)
 	$(CC) $(LDFLAGS) -o $(PROGRAM_NAME) $? -lgomp -lm
 
 clean:
-	rm *.o $(PROGRAM_NAME) $(EXEEXT) *~
+	rm *.o $(PROGRAM_NAME)
+
+video:
+	#change to frames folder and run script
+	@/bin/bash -c "  \
+	pushd ./frames;  \
+	./make_video.sh; \
+	popd;"
