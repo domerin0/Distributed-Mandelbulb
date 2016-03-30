@@ -26,6 +26,7 @@ omp:$(OBJS)
 clean:
 	rm *.o $(PROGRAM_NAME)
 
+
 video:
 	#change to frames folder and run script
 	@/bin/bash -c "  \
