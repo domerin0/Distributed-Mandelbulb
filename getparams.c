@@ -33,7 +33,7 @@ void getParameters(char *filename, CameraParams *camP, RenderParams *renP, Mande
 {
 	FILE *fp;
 	int ret;
-	double *d;
+	//double *d;
 
 	renP->fractalType = 0;
 	renP->maxRaySteps = 8000;
