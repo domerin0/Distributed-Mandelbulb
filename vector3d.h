@@ -72,11 +72,11 @@ typedef struct
 #define CLAMP(v, min, max) \
 {\
   v.x = v.x<min?min:v.x;\
-  v.x = v.x<max?max:v.x;\
+  v.x = v.x>max?max:v.x;\
   v.y = v.y<min?min:v.y;\
-  v.y = v.y<max?max:v.y;\
+  v.y = v.y>max?max:v.y;\
   v.z = v.z<min?min:v.z;\
-  v.z = v.z<max?max:v.z;\
+  v.z = v.z>max?max:v.z;\
 }
 
 #define MAGNITUDE(m,p) 	({ m=sqrt( p.x*p.x + p.y*p.y + p.z*p.z ); })
