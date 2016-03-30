@@ -31,8 +31,6 @@
 
 #define MAX_FRAMES 7200
 
-#define MAX_FRAMES 7200
-
 void getParameters(char *filename, CameraParams *camera_params, RenderParams *renderer_params,
 			 MandelBoxParams *mandelBox_paramsP);
 void getPath      (char *filename, CameraParams *camera_path, int *len);
