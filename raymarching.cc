@@ -82,7 +82,7 @@ void rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  &
 void normal(const vec3 & p, vec3 & normal)
 {
   // compute the normal at p
-  const float sqrt_mach_eps = 1.4901e-08;
+  const float sqrt_mach_eps = 3.4527e-04;
 	float mag = 0.0;
 	MAGNITUDE(mag, p);
 	float eps = MAX(mag, 1.0) * sqrt_mach_eps;

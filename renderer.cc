@@ -19,8 +19,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <stdio.h>
-#include <omp.h>
-
+#ifdef _OPENMP
+	#include <omp.h>
+#endif
 #include "color.h"
 #include "mandelbox.h"
 #include "camera.h"
