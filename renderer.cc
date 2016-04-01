@@ -26,10 +26,12 @@
 #include "vector3d.h"
 #include "3d.h"
 
+extern MandelBoxParams mandelBox_params;
+
 extern double getTime();
 extern void   printProgress( double perc, double time );
 
-extern void rayMarch (const RenderParams &render_params, const vec3 &from, const vec3  &to, double eps, pixelData &pix_data);
+extern void rayMarch (const RenderParams &render_params, const vec3 &from, const vec3  &to, double eps, pixelData &pix_data, MandelBoxParams &box_params);
 extern void getColour(const pixelData &pixData, const RenderParams &render_params,
 		      const vec3 &from, const vec3  &direction, vec3 &hitcolor);
 
@@ -74,7 +76,7 @@ void renderFractal(const CameraParams &camera_params, const RenderParams &render
 		//to.Normalize();
 
 	  //render the pixel
-	  rayMarch(renderer_params, from, to, eps, pix_data);
+	  rayMarch(renderer_params, from, to, eps, pix_data, mandelBox_params);
 	  //get the colour at this pixel
 	  getColour(pix_data, renderer_params, from, to, color);
 	  //save colour into texture

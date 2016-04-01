@@ -23,7 +23,7 @@
 
 extern MandelBoxParams mandelBox_params;
 extern double MandelBoxDE(const vec3 &pos, const MandelBoxParams &mPar, double c1, double c2);
-extern double MandelBulbDistanceEstimator(const vec3 &p0, const MandelBoxParams &params);
+extern double MandelBulbDistanceEstimator(const vec3 &p0, MandelBoxParams &params);
 
 //Distance Estimator Field Selector
 double DE(const vec3 &p)

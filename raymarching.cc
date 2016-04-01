@@ -24,12 +24,15 @@
 
 #include "color.h"
 #include "renderer.h"
+#include "mandelbox.h"
 
-extern double DE(const vec3 &p);
-void normal (const vec3 & p, vec3 & normal);
+extern double MandelBulbDistanceEstimator(const vec3 &p0, MandelBoxParams &params);
+#define DistEst(p0) MandelBulbDistanceEstimator(p0, frac_params) // Note this depends on scope...
+
+void normal (const vec3 & p, vec3 & normal, MandelBoxParams &frac_params);
 
 void rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  &direction, double eps,
-	      pixelData& pix_data)
+	      pixelData& pix_data, MandelBoxParams &frac_params)
 {
 
   double dist = 0.0;
@@ -49,7 +52,7 @@ void rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  &
 			//printf("p x = %f, y = %f, z = %f\n", p.x, p.y, p.z);
 
 			//p = from + direction * totalDist;
-      dist = DE(p);
+      dist = DistEst(p);
 
       totalDist += .95*dist;
 
@@ -72,7 +75,7 @@ void rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  &
 			MULT_DOUBLE(hitNormal, direction, epsModified);
 			SUBTRACT_POINT(hitNormal, p, hitNormal);
 			//const vec3 normPos = p - direction * epsModified;
-      normal(hitNormal, pix_data.normal);
+      normal(hitNormal, pix_data.normal, frac_params);
     }
   else
     //we have the background colour
@@ -80,7 +83,7 @@ void rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  &
 }
 
 
-void normal(const vec3 & p, vec3 & normal)
+void normal(const vec3 & p, vec3 & normal, MandelBoxParams &frac_params)
 {
   // compute the normal at p
   const double sqrt_mach_eps = 1.4901e-08;
@@ -104,9 +107,9 @@ void normal(const vec3 & p, vec3 & normal)
 	//x = ;
 	//y = ;
 	//z = ;
-	normal.x = DE(x1)-DE(y1);
-	normal.y = DE(x2)-DE(y2);
-	normal.z = DE(x3)-DE(y3);
+	normal.x = DistEst(x1)-DistEst(y1);
+	normal.y = DistEst(x2)-DistEst(y2);
+	normal.z = DistEst(x3)-DistEst(y3);
   /*normal = {
 		DE(x1)-DE(y1), //x
 		DE(x2)-DE(y2), //y
