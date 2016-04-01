@@ -27,16 +27,20 @@
 using namespace std;
 
 //---lightning and colouring---------
-static vec3 CamLight = {.x=1.0,.y=1.0,.z=1.0};
-static double CamLightW = 1.8;// 1.27536;
-static double CamLightMin = 0.3;// 0.48193;
+#define CAM_LIGHT {.x=1.0,.y=1.0,.z=1.0}
+#define CAM_LIGHT_W 1.8 // 1.27536;
+#define CAM_LIGHT_MIN 0.3 // 0.48193;
 //-----------------------------------
-static const vec3 baseColor = {.x=1.0, .y=1.0, .z=1.0};
-static const vec3 backColor = {.x=0.4,.y=0.4,.z=0.4};
+#define BASE_COLOR {.x=1.0, .y=1.0, .z=1.0}
+#define BACK_COLOR {.x=0.4,.y=0.4,.z=0.4}
 //-----------------------------------
 
-void lighting(const vec3 &n, const vec3 &color, const vec3 &pos, const vec3 &direction,  vec3 &outV)
+inline void lighting(const vec3 &n, const vec3 &color, const vec3 &pos, const vec3 &direction,  vec3 &outV)
 {
+  vec3 CamLight = CAM_LIGHT;
+  double CamLightW = CAM_LIGHT_W;
+  double CamLightMin = CAM_LIGHT_MIN;
+
   vec3 nn;
 
   SUBTRACT_POINT_DOUBLE(nn, n, 1.0);
@@ -50,11 +54,14 @@ void lighting(const vec3 &n, const vec3 &color, const vec3 &pos, const vec3 &dir
   //outV = CamLight*ambient*color;
 }
 
-vec3 getColour(const pixelData &pixData, const RenderParams &render_params,
-	       const vec3 &from, const vec3  &direction)
+void getColour(const pixelData &pixData, const RenderParams &render_params,
+	       const vec3 &from, const vec3  &direction, vec3  &hitColor)
 {
+  vec3 baseColor = BASE_COLOR;
+  vec3 backColor = BACK_COLOR;
+
   //colouring and lightning
-  vec3 hitColor = baseColor;
+  hitColor = baseColor;
 
   if (pixData.escaped == false)
     {
@@ -90,5 +97,5 @@ vec3 getColour(const pixelData &pixData, const RenderParams &render_params,
     //we have the background colour
     hitColor = backColor;
 
-  return hitColor;
+  //return hitColor;
 }

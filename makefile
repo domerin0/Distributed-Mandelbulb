@@ -1,4 +1,5 @@
 CC=pgc++
+CXX=pgc++
 #FLAGS    = -O2 -Wall
 #CFLAGS   = $(FLAGS)
 #CXXFLAGS = $(FLAGS)
@@ -13,12 +14,14 @@ $(PROGRAM_NAME): $(OBJS)
 	$(CC) -o $@ $? $(CFLAGS) $(LDFLAGS)
 
 
-acc: CFLAFGS=-fast -acc -Minfo -ta=tesla,cc50 -O2
+acc: CFLAGS=-fast -acc -Minfo -ta=tesla,cc50 -O2
+acc: CXXFLAGS=-fast -acc -Minfo -ta=tesla,cc50 -O2
 acc: LDFLAGS=-acc -ta=tesla,cc50
 acc: $(OBJS)
 	$(CC) $(LDFLAGS) -o$(PROGRAM_NAME) $? -lm
 
-omp: CFLAGS= -O2 -mp
+omp: CFLAGS=-O2 -mp
+omp: CXXFLAGS=-O2 -mp
 omp: LDFLAGS=-mp
 omp:$(OBJS)
 	$(CC) $(LDFLAGS) -o $(PROGRAM_NAME) $? -lgomp -lm

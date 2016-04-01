@@ -38,7 +38,8 @@ int UnProject(double winX, double winY, CameraParams camP, double *obj)
   in[3]=1.0;
   
   //Objects coordinates
-  MultiplyMatrixByVector(out, camP.matInvProjModel, in);
+  double *matrix = camP.matInvProjModel;
+  MultiplyMatrixByVector(out, matrix, in);
   
   if(out[3]==0.0)
     return 0;
