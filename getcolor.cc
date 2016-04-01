@@ -54,6 +54,7 @@ inline void lighting(const vec3 &n, const vec3 &color, const vec3 &pos, const ve
   //outV = CamLight*ambient*color;
 }
 
+#pragma acc routine seq
 void getColour(const pixelData &pixData, const RenderParams &render_params,
 	       const vec3 &from, const vec3  &direction, vec3  &hitColor)
 {

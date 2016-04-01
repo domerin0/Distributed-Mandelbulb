@@ -26,7 +26,8 @@
 
 //---------------------------------------------------------------------------------------------
 //when projection and modelview matricies are static (computed only once, and camera does not mover)
-int UnProject(double winX, double winY, CameraParams camP, double *obj)
+#pragma acc routine seq
+void UnProject(double winX, double winY, CameraParams camP, double *obj)
 {
   //Transformation vectors
   double in[4], out[4];
@@ -42,13 +43,13 @@ int UnProject(double winX, double winY, CameraParams camP, double *obj)
   MultiplyMatrixByVector(out, matrix, in);
   
   if(out[3]==0.0)
-    return 0;
+    return;
 
   out[3] = 1.0/out[3];
   obj[0] = out[0]*out[3];
   obj[1] = out[1]*out[3];
   obj[2] = out[2]*out[3];
-  return 1;
+  return;
 }
 
 

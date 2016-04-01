@@ -26,11 +26,13 @@
 #include "renderer.h"
 #include "mandelbox.h"
 
+#pragma acc routine seq
 extern double MandelBulbDistanceEstimator(const vec3 &p0, MandelBoxParams &params);
 #define DistEst(p0) MandelBulbDistanceEstimator(p0, frac_params) // Note this depends on scope...
 
-void normal (const vec3 & p, vec3 & normal, MandelBoxParams &frac_params);
+void inline normal (const vec3 & p, vec3 & normal, MandelBoxParams &frac_params);
 
+#pragma acc routine seq
 void rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  &direction, double eps,
 	      pixelData& pix_data, MandelBoxParams &frac_params)
 {

@@ -28,7 +28,7 @@
 #endif
 
 
-
+#pragma acc routine seq
 double MandelBulbDistanceEstimator(const vec3 &p0, MandelBoxParams &params)
 {
   vec3 z;
