@@ -14,9 +14,9 @@ $(PROGRAM_NAME): $(OBJS)
 	$(CC) -o $@ $? $(CFLAGS) $(LDFLAGS)
 
 
-acc: CFLAGS=-fast -acc -Minfo -ta=tesla,cc50 -O2
-acc: CXXFLAGS=-fast -acc -Minfo -ta=tesla,cc50 -O2
-acc: LDFLAGS=-acc -ta=tesla,cc50
+acc: CFLAGS=-fast -acc -Minfo=accel -ta=tesla:cc50
+acc: CXXFLAGS=-fast -acc -Minfo=accel -ta=tesla:cc50
+acc: LDFLAGS=-acc -ta=tesla:cc50
 acc: $(OBJS)
 	$(CC) $(LDFLAGS) -o$(PROGRAM_NAME) $? -lm
 

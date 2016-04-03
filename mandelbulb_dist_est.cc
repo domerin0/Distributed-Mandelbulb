@@ -40,6 +40,7 @@ double MandelBulbDistanceEstimator(const vec3 &p0, MandelBoxParams &params)
   double Bailout = params.rMin;
   double Power = params.rFixed;
 
+  #pragma acc loop seq
   for (int i=0; i < params.num_iter; i++) 
     {
       MAGNITUDE(r,z);

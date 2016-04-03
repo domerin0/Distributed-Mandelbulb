@@ -28,9 +28,11 @@
 
 #pragma acc routine seq
 extern double MandelBulbDistanceEstimator(const vec3 &p0, MandelBoxParams &params);
+
 #define DistEst(p0) MandelBulbDistanceEstimator(p0, frac_params) // Note this depends on scope...
 
-void inline normal (const vec3 & p, vec3 & normal, MandelBoxParams &frac_params);
+#pragma acc routine seq
+void normal (const vec3 & p, vec3 & normal, MandelBoxParams &frac_params);
 
 #pragma acc routine seq
 void rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  &direction, double eps,
@@ -46,6 +48,7 @@ void rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  &
 
   int steps=0;
   vec3 p, tempDir;
+  #pragma acc loop seq
   do
     {
 			MULT_DOUBLE(tempDir, direction, totalDist);

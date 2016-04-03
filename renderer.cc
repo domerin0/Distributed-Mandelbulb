@@ -82,21 +82,23 @@ void renderFractal(const CameraParams &camera_params, const RenderParams &render
 {
 
   const double eps = pow(10.0, renderer_params.detail);
-  double farPoint[3];
-  vec3 to, from;
+  vec3 from;
 
   //from.SetDoublePoint(camera_params.camPos);
 	from.x = camera_params.camPos[0];
 	from.y = camera_params.camPos[1];
 	from.z = camera_params.camPos[2];
 
+  // const double * from_x = &(camera_params.camPos[0]);
+  // const double * from_y = &(camera_params.camPos[1]);
+  // const double * from_z = &(camera_params.camPos[2]);
+
   const int height = renderer_params.height;
   const int width  = renderer_params.width;
 
-  pixelData pix_data;
+  // pixelData pix_data;
 
-  double time1 = getTime();
-  vec3 color;
+  // double time1 = getTime();
 
   int i,j,k;
   int n = height*width;
@@ -108,28 +110,34 @@ void renderFractal(const CameraParams &camera_params, const RenderParams &render
   memcpy(matInvProjModel, camera_params.matInvProjModel, 16*sizeof(double));
   int size1 = 4*sizeof(int);
   int size2 = 16*sizeof(double);
+  // int size3 = sizeof(vec3);
 
   RenderParams renderer_params1 = renderer_params;
 
-  #pragma acc data copyin(image[0:3*n]) create(to[0:n]) copyin(eps,from,renderer_params1,mandelBox_params,viewport[:size1], matInvProjModel[:size2])
-  #pragma acc loop
+  #pragma acc data copyin(image[0:3*n], eps, from, renderer_params1, mandelBox_params, viewport[:size1], matInvProjModel[:size2])
+  #pragma acc parallel
+  {
+  #pragma acc loop independent
   for(j = 0; j < height; j++)
     {
-
       //for each column pixel in the row
-      #pragma acc parallel loop
-      for(i = 0; i <width; i++)
-    	{
-	       // get point on the 'far' plane
-	       // since we render one frame only, we can use the more specialized method
-	       local_UnProject(i, j, viewport, matInvProjModel, farPoint);
+      #pragma acc loop independent
+      for(i = 0; i < width; i++)
+      {
+        vec3 color, to;
+        pixelData pix_data;
+        double farPoint[3];
+        // const vec3 from = {*from_x, *from_y, *from_z};
+        // get point on the 'far' plane
+        // since we render one frame only, we can use the more specialized method
+        local_UnProject(i, j, viewport, matInvProjModel, farPoint);
       
-	       // to = farPoint - camera_params.camPos
+	      // to = farPoint - camera_params.camPos
 	     	to.x = farPoint[0] - from.x;
 	     	to.y = farPoint[1] - from.y;
 	     	to.z = farPoint[2] - from.z;
       
-	       //to = SubtractDoubleDouble(farPoint,camera_params.camPos);
+	      //to = SubtractDoubleDouble(farPoint,camera_params.camPos);
 	     	NORMALIZE(to);
 	     	//to.Normalize();
       
@@ -145,5 +153,6 @@ void renderFractal(const CameraParams &camera_params, const RenderParams &render
 	     }
       //printProgress((j+1)/(double)height,getTime()-time1);
     }
-    #pragma acc data copyout(image[0:3*n])
+  }
+  #pragma acc data copyout(image[0:3*n])
 }

@@ -35,7 +35,8 @@ using namespace std;
 #define BACK_COLOR {.x=0.4,.y=0.4,.z=0.4}
 //-----------------------------------
 
-inline void lighting(const vec3 &n, const vec3 &color, const vec3 &pos, const vec3 &direction,  vec3 &outV)
+#pragma acc routine seq
+void lighting(const vec3 &n, const vec3 &color, const vec3 &pos, const vec3 &direction,  vec3 &outV)
 {
   vec3 CamLight = CAM_LIGHT;
   double CamLightW = CAM_LIGHT_W;

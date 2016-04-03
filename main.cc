@@ -82,8 +82,8 @@ int main(int argc, char** argv)
 	int image_size = renderer_params.width * renderer_params.height;
 	unsigned char *image = (unsigned char*)malloc(3*image_size*sizeof(unsigned char));
 
-	for (int i = 0; i < nframes; ++i){
-
+	for (int i = 0; i < nframes; ++i)
+	{
 		init3D(&camera_path[i], &renderer_params);
 		renderFractal(camera_path[i], renderer_params, image);
 
