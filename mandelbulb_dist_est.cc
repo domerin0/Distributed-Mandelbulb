@@ -49,16 +49,16 @@ float MandelBulbDistanceEstimator(const vec3 &p0, MandelBoxParams &params)
       float phi   = atan2f(z.y, z.x);
       float zr = powf(r, Power - 1);
       
-      dr = zr * Power * dr + 1.0;
+      dr = zr * Power * dr + 1;
       zr *= r;
 
       theta     = theta * Power;
       phi       = phi * Power;
 
-      float sin_theta = sinf(theta);
+      float zr_sin_theta = zr * sinf(theta);
 
-      z.x = zr * sin_theta * cosf(phi);
-      z.y = zr * sinf(phi) * sin_theta;
+      z.x = zr_sin_theta * cosf(phi);
+      z.y = zr_sin_theta * sinf(phi);
       z.z = zr * cosf(theta);
 
       z.x = z.x + p0.x;
