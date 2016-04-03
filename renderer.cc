@@ -35,6 +35,7 @@ extern void   printProgress( double perc, double time );
 #pragma acc routine seq
 extern void UnProject(double winX, double winY, CameraParams camP, double *obj);
 
+#pragma acc routine seq
 void MultiplyMatrixByVector1(double *resultvector, const double *matrix, double *pvector)
 {
   resultvector[0]=matrix[0]*pvector[0]+matrix[4]*pvector[1]+matrix[8]*pvector[2]+matrix[12]*pvector[3];
@@ -100,7 +101,6 @@ void renderFractal(const CameraParams &camera_params, const RenderParams &render
 
   // double time1 = getTime();
 
-  int i,j,k;
   int n = height*width;
 
   int viewport[4];
@@ -113,46 +113,41 @@ void renderFractal(const CameraParams &camera_params, const RenderParams &render
   // int size3 = sizeof(vec3);
 
   RenderParams renderer_params1 = renderer_params;
+  
+  vec3 color, to;
+  pixelData pix_data;
+  double farPoint[3];
 
-  #pragma acc data copyin(image[0:3*n], eps, from, renderer_params1, mandelBox_params, viewport[:size1], matInvProjModel[:size2])
-  #pragma acc parallel
+  #pragma acc data copyout(image[0:3*n]) copyin(eps, from, renderer_params1, mandelBox_params, viewport[:size1], matInvProjModel[:size2])
   {
-  #pragma acc loop independent
-  for(j = 0; j < height; j++)
+  //#pragma acc parallel
+  {
+  #pragma acc kernels loop independent private(color, to, pix_data, farPoint) //present(image, eps, from, renderer_params1, mandelBox_params, viewport, matInvProjModel)
+  for(int j = 0; j < height; j++)
     {
       //for each column pixel in the row
-      #pragma acc loop independent
-      for(i = 0; i < width; i++)
+      //#pragma acc for independent private(j) shared (image[0:3*n])
+      for(int i = 0; i < width; i++)
       {
-        vec3 color, to;
-        pixelData pix_data;
-        double farPoint[3];
-        // const vec3 from = {*from_x, *from_y, *from_z};
-        // get point on the 'far' plane
-        // since we render one frame only, we can use the more specialized method
+	
         local_UnProject(i, j, viewport, matInvProjModel, farPoint);
       
-	      // to = farPoint - camera_params.camPos
-	     	to.x = farPoint[0] - from.x;
-	     	to.y = farPoint[1] - from.y;
-	     	to.z = farPoint[2] - from.z;
-      
-	      //to = SubtractDoubleDouble(farPoint,camera_params.camPos);
-	     	NORMALIZE(to);
-	     	//to.Normalize();
-      
-	       //render the pixel
-	       rayMarch(renderer_params1, from, to, eps, pix_data, mandelBox_params);
-	       //get the colour at this pixel
-	       getColour(pix_data,renderer_params1, from, to, color);
-	       //save colour into texture
-	       k = (j * width + i)*3;
-	       image[k+2] = (unsigned char)(color.x * 255);
-	       image[k+1] = (unsigned char)(color.y * 255);
-	       image[k]   = (unsigned char)(color.z * 255);
-	     }
-      //printProgress((j+1)/(double)height,getTime()-time1);
-    }
+      	to.x = farPoint[0] - from.x;
+      	to.y = farPoint[1] - from.y;
+      	to.z = farPoint[2] - from.z;
+ 
+      	NORMALIZE(to);
+ 
+        rayMarch(renderer_params1, from, to, eps, pix_data, mandelBox_params);
+        
+        getColour(pix_data,renderer_params1, from, to, color);
+        
+        int k = (j * width + i)*3;
+        image[k+2] = (unsigned char)(color.x * 255);
+        image[k+1] = (unsigned char)(color.y * 255);
+        image[k]   = (unsigned char)(color.z * 255);
+     }
+   }
   }
-  #pragma acc data copyout(image[0:3*n])
+  }
 }
