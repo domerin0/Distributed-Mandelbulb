@@ -84,11 +84,6 @@ void getParameters(char *filename, CameraParams *camP, RenderParams *renP, Mande
 			case 5:
 				sscanf(buf, "%f ", &renP->brightness);
 				break;
-
-			//FILENAME
-			case 6:
-				strcpy(renP->file_name, buf);
-				break;
 			}
 		count++;
 	}

@@ -43,6 +43,6 @@ int    InvertMatrix(float *m, float *out);
 void   Translate(float *result, float x, float y, float z);
 //int    UnProject(float winX, float winY, float winZ, const float *model,
 //		 const float *proj, const int *view, float *obj);
-int    UnProject(float winX, float winY, CameraParams camP, float *obj);
+//int    UnProject(float winX, float winY, CameraParams camP, float *obj);
 
 #endif

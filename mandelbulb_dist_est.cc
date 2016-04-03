@@ -28,8 +28,8 @@
 #endif
 
 
-
-float MandelBulbDistanceEstimator(const vec3 &p0, const MandelBoxParams &params)
+#pragma acc routine seq
+float MandelBulbDistanceEstimator(const vec3 &p0, MandelBoxParams &params)
 {
   vec3 z;
   z = p0;
@@ -47,15 +47,19 @@ float MandelBulbDistanceEstimator(const vec3 &p0, const MandelBoxParams &params)
 
       float theta = acosf(z.z/r);
       float phi   = atan2f(z.y, z.x);
-      dr = powf(r, Power - 1.0) * Power * dr + 1.0;
+      float zr = powf(r, Power - 1);
+      
+      dr = zr * Power * dr + 1.0;
+      zr *= r;
 
-      float zr = powf(r, Power);
       theta     = theta * Power;
       phi       = phi * Power;
 
-      z.x = zr*sinf(theta)*cosf(phi);
-      z.y = zr*sinf(phi)*sinf(theta);
-      z.z = zr*cosf(theta);
+      float sin_theta = sinf(theta);
+
+      z.x = zr * sin_theta * cosf(phi);
+      z.y = zr * sinf(phi) * sin_theta;
+      z.z = zr * cosf(theta);
 
       z.x = z.x + p0.x;
       z.y = z.y + p0.y;

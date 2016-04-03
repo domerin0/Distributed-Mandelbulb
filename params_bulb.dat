@@ -1,6 +1,7 @@
 # IMAGE
 # width height
-800 600
+#3840 2160
+1920 1080
 # detail level, the smaller the more detailed (-3)
 -3
 # MANDELBOX

@@ -1,10 +1,11 @@
-CC=g++
-FLAGS    = -O2 -Wall -fopenmp
-CFLAGS   = $(FLAGS)
-CXXFLAGS = $(FLAGS)
-LDFLAGS  = -lm
+CC=pgc++
+CXX=pgc++
+#FLAGS    = -O2 -Wall
+#CFLAGS   = $(FLAGS)
+#CXXFLAGS = $(FLAGS)
+#LDFLAGS  = -lm
 
-PROGRAM_NAME=mandelbox
+PROGRAM_NAME=mandelbulb
 
 OBJS=main.o print.o timing.o savebmp.o getparams.o getpath.o 3d.o getcolor.o distance_est.o \
 	mandelboxde.o raymarching.o renderer.o init3D.o mandelbulb_dist_est.o
@@ -13,13 +14,21 @@ $(PROGRAM_NAME): $(OBJS)
 	$(CC) -o $@ $? $(CFLAGS) $(LDFLAGS)
 
 
-omp: CFLAGS=-g -Wall -O2 -fopenmp
-omp: LDFLAGS=-fopenmp
+acc: CFLAGS=-fast -acc -Minfo=accel -ta=tesla:cc50
+acc: CXXFLAGS=-fast -acc -Minfo=accel -ta=tesla:cc50
+acc: LDFLAGS=-acc -ta=tesla:cc50
+acc: $(OBJS)
+	$(CC) $(LDFLAGS) -o$(PROGRAM_NAME) $? -lm
+
+omp: CFLAGS=-O2 -mp
+omp: CXXFLAGS=-O2 -mp
+omp: LDFLAGS=-mp
 omp:$(OBJS)
 	$(CC) $(LDFLAGS) -o $(PROGRAM_NAME) $? -lgomp -lm
 
 clean:
-	rm *.o $(PROGRAM_NAME) $(EXEEXT) *~
+	rm *.o $(PROGRAM_NAME)
+
 
 video:
 	#change to frames folder and run script

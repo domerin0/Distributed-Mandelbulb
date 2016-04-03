@@ -23,10 +23,10 @@
 
 extern MandelBoxParams mandelBox_params;
 extern float MandelBoxDE(const vec3 &pos, const MandelBoxParams &mPar, float c1, float c2);
-extern float MandelBulbDistanceEstimator(const vec3 &p0, const MandelBoxParams &params);
+extern float MandelBulbDistanceEstimator(const vec3 &p0, MandelBoxParams &params);
 
 //Distance Estimator Field Selector
-float DE(const vec3 &p)
+float DE(vec3 &p)
 {
   //double c1 = fabs(mandelBox_params.scale - 1.0);
   //double c2 = pow( fabs(mandelBox_params.scale), 1 - mandelBox_params.num_iter);

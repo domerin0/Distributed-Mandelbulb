@@ -26,6 +26,7 @@
 
 //---------------------------------------------------------------------------------------------
 //when projection and modelview matricies are static (computed only once, and camera does not mover)
+#pragma acc routine seq
 int UnProject(float winX, float winY, CameraParams camP, float *obj)
 {
   //Transformation vectors

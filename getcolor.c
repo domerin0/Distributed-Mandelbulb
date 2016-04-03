@@ -22,21 +22,26 @@
 #include "renderer.h"
 #include "vector3d.h"
 #include <math.h>
-//#include <algorithm>
+#include <algorithm>
 
-//using namespace std;
+using namespace std;
 
 //---lightning and colouring---------
-static vec3 CamLight = {.x=1.0,.y=1.0,.z=1.0};
-static float CamLightW = 1.8;// 1.27536;
-static float CamLightMin = 0.3;// 0.48193;
+#define CAM_LIGHT {.x=1.0,.y=1.0,.z=1.0}
+#define CAM_LIGHT_W 1.8 // 1.27536;
+#define CAM_LIGHT_MIN 0.3 // 0.48193;
 //-----------------------------------
-static const vec3 baseColor = {.x=1.0, .y=1.0, .z=1.0};
-static const vec3 backColor = {.x=0.4,.y=0.4,.z=0.4};
+#define BASE_COLOR {.x=1.0, .y=1.0, .z=1.0}
+#define BACK_COLOR {.x=0.4,.y=0.4,.z=0.4}
 //-----------------------------------
 
+#pragma acc routine seq
 void lighting(const vec3 &n, const vec3 &color, const vec3 &pos, const vec3 &direction,  vec3 &outV)
 {
+  vec3 CamLight = CAM_LIGHT;
+  float CamLightW = CAM_LIGHT_W;
+  float CamLightMin = CAM_LIGHT_MIN;
+
   vec3 nn;
 
   SUBTRACT_POINT_FLOAT(nn, n, 1.0);
@@ -44,17 +49,21 @@ void lighting(const vec3 &n, const vec3 &color, const vec3 &pos, const vec3 &dir
   float d = 0.0;
   DOT(d, direction, nn);
   float ambient = MAX(CamLightMin, d) * CamLightW;
-  //float ambient = max( CamLightMin, nn.Dot(direction) )*CamLightW;
+  //double ambient = max( CamLightMin, nn.Dot(direction) )*CamLightW;
   MULT_FLOAT(outV, CamLight, ambient);
   MULT_VEC(outV, outV, color);
   //outV = CamLight*ambient*color;
 }
 
-vec3 getColour(const pixelData &pixData, const RenderParams &render_params,
-	       const vec3 &from, const vec3  &direction)
+#pragma acc routine seq
+void getColour(const pixelData &pixData, const RenderParams &render_params,
+         const vec3 &from, const vec3  &direction, vec3  &hitColor)
 {
+  vec3 baseColor = BASE_COLOR;
+  vec3 backColor = BACK_COLOR;
+
   //colouring and lightning
-  vec3 hitColor = baseColor;
+  hitColor = baseColor;
 
   if (pixData.escaped == false)
   {
@@ -90,5 +99,5 @@ vec3 getColour(const pixelData &pixData, const RenderParams &render_params,
     //we have the background colour
     hitColor = backColor;
 
-  return hitColor;
+  //return hitColor;
 }

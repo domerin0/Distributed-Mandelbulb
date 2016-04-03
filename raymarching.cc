@@ -24,12 +24,20 @@
 
 #include "color.h"
 #include "renderer.h"
+#include "mandelbox.h"
 
-extern float DE(const vec3 &p);
-void normal (const vec3 & p, vec3 & normal);
 
+#pragma acc routine seq
+extern float MandelBulbDistanceEstimator(const vec3 &p0, MandelBoxParams &params);
+
+#define DistEst(p0) MandelBulbDistanceEstimator(p0, frac_params) // Note this depends on scope...
+
+#pragma acc routine seq
+void normal (const vec3 & p, vec3 & normal, MandelBoxParams &frac_params);
+
+#pragma acc routine seq
 void rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  &direction, float eps,
-	      pixelData& pix_data)
+	      pixelData& pix_data, MandelBoxParams &frac_params)
 {
   float dist = 0.0;
   float totalDist = 0.0;
@@ -48,9 +56,9 @@ void rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  &
     //printf("p x = %f, y = %f, z = %f\n", p.x, p.y, p.z);
 
     //p = from + direction * totalDist;
-    dist = DE(p);
+    dist = DistEst(p);
 
-    totalDist += .95*dist;
+    totalDist += .98*dist;
 
     epsModified = totalDist;
     epsModified*=eps;
@@ -71,7 +79,7 @@ void rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  &
     MULT_FLOAT(hitNormal, direction, epsModified);
     SUBTRACT_POINT(hitNormal, p, hitNormal);
     //const vec3 normPos = p - direction * epsModified;
-    normal(hitNormal, pix_data.normal);
+    normal(hitNormal, pix_data.normal, frac_params);
   }
   else
     //we have the background colour
@@ -79,7 +87,7 @@ void rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  &
 }
 
 
-void normal(const vec3 & p, vec3 & normal)
+void normal(const vec3 & p, vec3 & normal, MandelBoxParams &frac_params)
 {
   // compute the normal at p
   const float sqrt_mach_eps = 3.4527e-04;
@@ -103,9 +111,9 @@ void normal(const vec3 & p, vec3 & normal)
 	//x = ;
 	//y = ;
 	//z = ;
-	normal.x = DE(x1)-DE(y1);
-	normal.y = DE(x2)-DE(y2);
-	normal.z = DE(x3)-DE(y3);
+	normal.x = DistEst(x1)-DistEst(y1);
+	normal.y = DistEst(x2)-DistEst(y2);
+	normal.z = DistEst(x3)-DistEst(y3);
   /*normal = {
 		DE(x1)-DE(y1), //x
 		DE(x2)-DE(y2), //y
