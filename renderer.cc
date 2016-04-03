@@ -127,6 +127,7 @@ void renderFractal(const CameraParams &camera_params, const RenderParams &render
     {
       //for each column pixel in the row
       //#pragma acc for independent private(j) shared (image[0:3*n])
+      #pragma acc for private(color, to, pix_data, farPoint, j)
       for(int i = 0; i < width; i++)
       {
 	
