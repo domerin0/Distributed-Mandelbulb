@@ -27,53 +27,53 @@
 
 #define SQR(x) ((x)*(x))
 
-#define COMPONENT_FOLD(x) { (x) = fabs(x) <= 1? (x) : copysign(2,(x))-(x); }
+#define COMPONENT_FOLD(x) { (x) = fabsf(x) <= 1? (x) : copysignf(2,(x))-(x); }
 
 
-double MandelBoxDE(const vec3 &p0, const MandelBoxParams &params, double c1, double c2)
+float MandelBoxDE(const vec3 &p0, const MandelBoxParams &params, float c1, float c2)
 {
   vec3 p = p0;
-  double rMin2   = SQR(params.rMin);
-  double rFixed2 = SQR(params.rFixed);
-  double escape  = SQR(params.escape_time);
-  double dfactor = 1;
-  double r2      =-1;
-  const double rFixed2rMin2 = rFixed2/rMin2;
+  float rMin2   = SQR(params.rMin);
+  float rFixed2 = SQR(params.rFixed);
+  float escape  = SQR(params.escape_time);
+  float dfactor = 1;
+  float r2      =-1;
+  const float rFixed2rMin2 = rFixed2/rMin2;
 
   int i = 0;
   while (i< params.num_iter && r2 < escape)
+  {
+    COMPONENT_FOLD(p.x);
+    COMPONENT_FOLD(p.y);
+    COMPONENT_FOLD(p.z);
+
+    DOT(r2, p, p);
+    //r2 = p.Dot(p);
+
+    if (r2<rMin2)
     {
-      COMPONENT_FOLD(p.x);
-      COMPONENT_FOLD(p.y);
-      COMPONENT_FOLD(p.z);
-
-      DOT(r2, p, p);
-      //r2 = p.Dot(p);
-
-      if (r2<rMin2)
-	{
-    MULT_DOUBLE(p, p, rFixed2rMin2);
-	  //p = p*(rFixed2rMin2);
-	  dfactor *= (rFixed2rMin2);
-	}
-      else
-      if ( r2<rFixed2)
-	{
-	  const double t = (rFixed2/r2);
-    MULT_DOUBLE(p, p, rFixed2/r2);
-    //p = p*(rFixed2/r2);;
-	  dfactor *= t;
-	}
-
-      dfactor = dfactor*fabs(params.scale)+1.0;
-
-      //vec3 p1;
-      MULT_DOUBLE(p, p, params.scale);
-      ADD_POINT(p, p, p0);
-      //p = p*params.scale+p0;
-      i++;
+      MULT_FLOAT(p, p, rFixed2rMin2);
+      //p = p*(rFixed2rMin2);
+      dfactor *= (rFixed2rMin2);
     }
-  double mag = 0.0;
+    else
+    if ( r2<rFixed2)
+    {
+      const float t = (rFixed2/r2);
+      MULT_FLOAT(p, p, rFixed2/r2);
+      //p = p*(rFixed2/r2);;
+      dfactor *= t;
+    }
+
+    dfactor = dfactor*fabsf(params.scale)+1.0;
+
+    //vec3 p1;
+    MULT_FLOAT(p, p, params.scale);
+    ADD_POINT(p, p, p0);
+    //p = p*params.scale+p0;
+    i++;
+  }
+  float mag = 0.0;
   MAGNITUDE(mag, p);
   return  (mag - c1) / dfactor - c2;
 }

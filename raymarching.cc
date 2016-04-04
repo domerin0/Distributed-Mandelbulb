@@ -26,8 +26,9 @@
 #include "renderer.h"
 #include "mandelbox.h"
 
+
 #pragma acc routine seq
-extern double MandelBulbDistanceEstimator(const vec3 &p0, MandelBoxParams &params);
+extern float MandelBulbDistanceEstimator(const vec3 &p0, MandelBoxParams &params);
 
 #define DistEst(p0) MandelBulbDistanceEstimator(p0, frac_params) // Note this depends on scope...
 
@@ -35,53 +36,51 @@ extern double MandelBulbDistanceEstimator(const vec3 &p0, MandelBoxParams &param
 void normal (const vec3 & p, vec3 & normal, MandelBoxParams &frac_params);
 
 #pragma acc routine seq
-void rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  &direction, double eps,
+void rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  &direction, float eps,
 	      pixelData& pix_data, MandelBoxParams &frac_params)
 {
-
-  double dist = 0.0;
-  double totalDist = 0.0;
+  float dist = 0.0;
+  float totalDist = 0.0;
 
   // We will adjust the minimum distance based on the current zoom
 
-  double epsModified = 0.0;
+  float epsModified = 0.0;
 
   int steps=0;
   vec3 p, tempDir;
-  #pragma acc loop seq
   do
-    {
-			MULT_DOUBLE(tempDir, direction, totalDist);
-			//printf("tempDir x = %f, y = %f, z = %f\n", tempDir.x, tempDir.y, tempDir.z);
-			ADD_POINT(p, from, tempDir);
-			//printf("p x = %f, y = %f, z = %f\n", p.x, p.y, p.z);
+  {
+    MULT_FLOAT(tempDir, direction, totalDist);
+    //printf("tempDir x = %f, y = %f, z = %f\n", tempDir.x, tempDir.y, tempDir.z);
+    ADD_POINT(p, from, tempDir);
+    //printf("p x = %f, y = %f, z = %f\n", p.x, p.y, p.z);
 
-			//p = from + direction * totalDist;
-      dist = DistEst(p);
+    //p = from + direction * totalDist;
+    dist = DistEst(p);
 
-      totalDist += .95*dist;
+    totalDist += .98*dist;
 
-      epsModified = totalDist;
-      epsModified*=eps;
-      steps++;
-    }
+    epsModified = totalDist;
+    epsModified*=eps;
+    steps++;
+  }
   while (dist > epsModified && totalDist <= render_params.maxDistance && steps < render_params.maxRaySteps);
 
   vec3 hitNormal;
   if (dist < epsModified)
-    {
-      //we didnt escape
-      pix_data.escaped = false;
+  {
+    //we didnt escape
+    pix_data.escaped = false;
 
-      // We hit something, or reached MaxRaySteps
-      pix_data.hit = p;
+    // We hit something, or reached MaxRaySteps
+    pix_data.hit = p;
 
-      //figure out the normal of the surface at this point
-			MULT_DOUBLE(hitNormal, direction, epsModified);
-			SUBTRACT_POINT(hitNormal, p, hitNormal);
-			//const vec3 normPos = p - direction * epsModified;
-      normal(hitNormal, pix_data.normal, frac_params);
-    }
+    //figure out the normal of the surface at this point
+    MULT_FLOAT(hitNormal, direction, epsModified);
+    SUBTRACT_POINT(hitNormal, p, hitNormal);
+    //const vec3 normPos = p - direction * epsModified;
+    normal(hitNormal, pix_data.normal, frac_params);
+  }
   else
     //we have the background colour
     pix_data.escaped = true;
@@ -91,11 +90,11 @@ void rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  &
 void normal(const vec3 & p, vec3 & normal, MandelBoxParams &frac_params)
 {
   // compute the normal at p
-  const double sqrt_mach_eps = 1.4901e-08;
-	double mag = 0.0;
+  const float sqrt_mach_eps = 3.4527e-04;
+	float mag = 0.0;
 	MAGNITUDE(mag, p);
-	double eps = MAX(mag, 1.0) * sqrt_mach_eps;
-	//double eps = std::max( p.Magnitude(), 1.0 )*sqrt_mach_eps;
+	float eps = MAX(mag, 1.0) * sqrt_mach_eps;
+	//float eps = std::max( p.Magnitude(), 1.0 )*sqrt_mach_eps;
 
   vec3 e1 = {eps, 0,   0};
   vec3 e2= { 0 , eps, 0};
@@ -108,7 +107,7 @@ void normal(const vec3 & p, vec3 & normal, MandelBoxParams &frac_params)
 	SUBTRACT_POINT(y1, p, e1);
 	SUBTRACT_POINT(y2, p, e2);
 	SUBTRACT_POINT(y3, p, e3);
-	//double x, y, x;
+	//float x, y, x;
 	//x = ;
 	//y = ;
 	//z = ;

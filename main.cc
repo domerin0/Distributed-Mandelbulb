@@ -47,22 +47,29 @@ int main(int argc, char** argv)
 	//http://stackoverflow.com/questions/9314586/c-faster-way-to-check-if-a-directory-exists
 	struct stat s;
 	int err = stat("/path/to/frames", &s);
-	if(-1 == err) {
-  	mkdir("frames", 0700);
+	if (-1 == err)
+	{
+		mkdir("frames", 0700);
+	}
+	else 
+	{
+		if(S_ISDIR(s.st_mode))
+		{
+		/* it's a dir */
 		} else {
-    	if(S_ISDIR(s.st_mode)) {
-        	/* it's a dir */
-    	} else {
-        	/* exists but is no dir */
-    	}
+		/* exists but is no dir */
 		}
+	}
 	assert(argc >= 2);
 	char* path;
-	if (argc == 3){
+	if (argc == 3)
+	{
 		path = (char*)malloc(sizeof(char) * (strlen(argv[2]) + 1));
 		memcpy(path, argv[2], strlen(argv[2]) + 1);
 		printf("%s\n", path);
-	}else{
+	}
+	else
+	{
 		path = (char*)malloc(sizeof(char) * (strlen("path.dat") + 1));
 		sprintf(path, "path.dat");
 		printf("%s\n", path);

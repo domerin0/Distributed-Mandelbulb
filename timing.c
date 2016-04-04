@@ -26,14 +26,15 @@
 #endif
 #include <unistd.h>
 
-double getTime() {  
-#if defined(_MSC_VER) || defined(__MINGW32__)
-  return 0;
-#else         
-  struct rusage usage;
-  getrusage(RUSAGE_SELF, &usage);
-  struct timeval time;
-  time = usage.ru_utime;
-  return time.tv_sec+time.tv_usec/1e6;
-#endif
+double getTime()
+{  
+  #if defined(_MSC_VER) || defined(__MINGW32__)
+    return 0;
+  #else         
+    struct rusage usage;
+    getrusage(RUSAGE_SELF, &usage);
+    struct timeval time;
+    time = usage.ru_utime;
+    return (float)(time.tv_sec+time.tv_usec/1e6);
+  #endif
 }
