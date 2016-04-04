@@ -3,10 +3,10 @@
 #3840 2160
 1920 1080
 # detail level, the smaller the more detailed (-3)
--5
+-3
 # MANDELBOX
 # n/a, rMin (bailout), rFixed (power) (0 4.0 8)
-0  4.0 14
+0  4.0 8
 # max number of iterations, escape time
 100 0
 # COLORING
