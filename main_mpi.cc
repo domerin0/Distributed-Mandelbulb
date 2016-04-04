@@ -2,7 +2,6 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <mpi.h>
-#include "a2.h"
 #include <stdio.h>
 #include "camera.h"
 #include "renderer.h"
@@ -22,15 +21,21 @@ void renderFractal(const CameraParams &camera_params, const RenderParams &render
 void saveBMP      (const char* filename, const unsigned char* image, int width, int height);
 void writeTimesToTextFile(double* buffer, int p);
 
+MandelBoxParams mandelBox_params;
+
 int main(int argc, char** argv)
 {
 
+  MPI_Init(&argc, &argv);
+  int nframes;
   int my_rank, p;
   MPI_Status status;
   double mytime;
   double *rbuf;
+	CameraParams *camera_path, *sub_camera_path;
+  RenderParams renderer_params;
+	char frame_name[256];
 
-  MPI_Init(&argc, &argv);
   mytime = MPI_Wtime();
 
   MPI_Comm_size(MPI_COMM_WORLD, &p);
@@ -68,31 +73,50 @@ int main(int argc, char** argv)
       printf("%s\n", path);
     }
 
-    RenderParams renderer_params;
-    CameraParams *camera_path = (CameraParams*)malloc(MAX_FRAMES*sizeof(CameraParams));
+    camera_path = (CameraParams*)malloc(MAX_FRAMES*sizeof(CameraParams));
     assert(camera_path);
-    int nframes;
-    char frame_name[256];
 
     getParameters(argv[1], &camera_path[0], &renderer_params, &mandelBox_params);
 
     getPath(path, camera_path, &nframes);
 
-
   }else{
+		camera_path = (CameraParams*)malloc(MAX_FRAMES*sizeof(CameraParams));
+	}
+	/*
+	MPI_Scatter(
+	    void* send_data,
+	    int send_count,
+	    MPI_Datatype send_datatype,
+	    void* recv_data,
+	    int recv_count,
+	    MPI_Datatype recv_datatype,
+	    int root,
+	    MPI_Comm communicator)
+	*/
 
-  }
+	/*
+	The num frames and render_params are broadcast because every process needs them
+	*/
+		MPI_Bcast(&nframes, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-  /*
+		MPI_Bcast(&renderer_params, sizeof(RenderParams), MPI_BYTE, 0, MPI_COMM_WORLD);
+
+		sub_camera_path = (CameraParams*)malloc((nframes/p) * sizeof(CameraParams));
+
+		MPI_Scatter(camera_path, (nframes/p) * sizeof(CameraParams), MPI_BYTE, sub_camera_path,
+			(nframes/p) * sizeof(CameraParams), MPI_BYTE, 0, MPI_COMM_WORLD);
+
+	/*
     All nodes do rendering work and save images
   */
   int image_size = renderer_params.width * renderer_params.height;
   unsigned char *image = (unsigned char*)malloc(3*image_size*sizeof(unsigned char));
 
-  for (int i = 0; i < nframes; ++i)
+  for (int i = 0; i < nframes/p; ++i)
   {
-    init3D(&camera_path[i], &renderer_params);
-    renderFractal(camera_path[i], renderer_params, image);
+    init3D(&sub_camera_path[i], &renderer_params);
+    renderFractal(sub_camera_path[i], renderer_params, image);
 
     //TODO create render directory from input
     //TODO create starting name from number from input (in case of previously generated frames)
