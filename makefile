@@ -1,5 +1,5 @@
-CC=g++
-CXX=g++
+CC=pgc++
+CXX=pgc++
 #FLAGS    = -O2 -Wall
 #CFLAGS   = $(FLAGS)
 #CXXFLAGS = $(FLAGS)
