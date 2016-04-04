@@ -98,6 +98,7 @@ int main(int argc, char** argv)
 		//TODO create starting name from number from input (in case of previously generated frames)
 		snprintf(frame_name, sizeof(char) * 256, "./frames/frame_%04d.bmp", i);
 		saveBMP(frame_name, image, renderer_params.width, renderer_params.height);
+		printf("On frame: %d\n", i);
 
 	}
 
