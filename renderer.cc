@@ -121,14 +121,14 @@ void renderFractal(const CameraParams &camera_params, const RenderParams &render
 
   #pragma acc data copyout(image[0:3*n]) copyin(eps, from, renderer_params1, mandelBox_params, viewport[:size1], matInvProjModel[:size2])
   {
-  // #pragma acc parallel
+  #pragma acc parallel num_gangs(1024) num_workers(128)
   {
-  #pragma acc parallel loop independent private(color, to, pix_data, farPoint) //present(image, eps, from, renderer_params1, mandelBox_params, viewport, matInvProjModel)
+  #pragma acc loop gang independent private(color, to, pix_data, farPoint) //present(image, eps, from, renderer_params1, mandelBox_params, viewport, matInvProjModel)
   for(int j = 0; j < height; j++)
     {
       //for each column pixel in the row
       //#pragma acc for independent private(j) shared (image[0:3*n])
-      #pragma acc loop private(color, to, pix_data, farPoint)
+      #pragma acc loop worker private(color, to, pix_data, farPoint)
       for(int i = 0; i < width; i++)
       {
   
