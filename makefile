@@ -10,6 +10,9 @@ PROGRAM_NAME=mandelbulb
 OBJS=main.o print.o timing.o savebmp.o getparams.o getpath.o 3d.o getcolor.o distance_est.o \
 	mandelboxde.o raymarching.o renderer.o init3D.o mandelbulb_dist_est.o
 
+OBJS_MPI= main_mpi.o print.o timing.o savebmp.o getparams.o getpath.o 3d.o getcolor.o distance_est.o \
+	mandelboxde.o raymarching.o renderer.o init3D.o mandelbulb_dist_est.o
+
 $(PROGRAM_NAME): $(OBJS)
 	$(CC) -o $@ $? $(CFLAGS) $(LDFLAGS)
 
@@ -19,6 +22,11 @@ acc: CXXFLAGS=-fast -acc -Minfo=accel -ta=tesla:cc50
 acc: LDFLAGS=-acc -ta=tesla:cc50
 acc: $(OBJS)
 	$(CC) $(LDFLAGS) -o$(PROGRAM_NAME) $? -lm
+
+mpi: CC=mpic++
+mpi: CXX=mpic++
+mpi: $(OBJS_MPI)
+	$(CC) -o $(PROGRAM_NAME) $? -lm
 
 omp: CFLAGS=-O2 -mp
 omp: CXXFLAGS=-O2 -mp

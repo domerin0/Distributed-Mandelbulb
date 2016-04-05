@@ -79,21 +79,11 @@ int main(int argc, char** argv)
     getParameters(argv[1], &camera_path[0], &renderer_params, &mandelBox_params);
 
     getPath(path, camera_path, &nframes);
+		printf("I'm process 0 and there are: %d\n", nframes);
 
   }else{
 		camera_path = (CameraParams*)malloc(MAX_FRAMES*sizeof(CameraParams));
 	}
-	/*
-	MPI_Scatter(
-	    void* send_data,
-	    int send_count,
-	    MPI_Datatype send_datatype,
-	    void* recv_data,
-	    int recv_count,
-	    MPI_Datatype recv_datatype,
-	    int root,
-	    MPI_Comm communicator)
-	*/
 
 	/*
 	The num frames and render_params are broadcast because every process needs them
@@ -103,24 +93,35 @@ int main(int argc, char** argv)
 		MPI_Bcast(&renderer_params, sizeof(RenderParams), MPI_BYTE, 0, MPI_COMM_WORLD);
 
 		sub_camera_path = (CameraParams*)malloc((nframes/p) * sizeof(CameraParams));
-
+		printf("I'm process %d, and I have %d frames\n", my_rank, nframes/p);
 		MPI_Scatter(camera_path, (nframes/p) * sizeof(CameraParams), MPI_BYTE, sub_camera_path,
 			(nframes/p) * sizeof(CameraParams), MPI_BYTE, 0, MPI_COMM_WORLD);
 
 	/*
     All nodes do rendering work and save images
   */
+	int offset = (nframes / p) * my_rank;
   int image_size = renderer_params.width * renderer_params.height;
   unsigned char *image = (unsigned char*)malloc(3*image_size*sizeof(unsigned char));
 
+
+		printf("width %d height %d on process %d\n", renderer_params.width,
+			renderer_params.height, my_rank);
+
   for (int i = 0; i < nframes/p; ++i)
   {
+		printf("cam pos x: %f y : %f z: %f on p: %d\n",
+		sub_camera_path[i].camPos[0],
+		sub_camera_path[i].camPos[1],
+		sub_camera_path[i].camPos[2],
+		my_rank);
+
     init3D(&sub_camera_path[i], &renderer_params);
     renderFractal(sub_camera_path[i], renderer_params, image);
-
     //TODO create render directory from input
     //TODO create starting name from number from input (in case of previously generated frames)
-    snprintf(frame_name, sizeof(char) * 256, "./frames/frame_%04d.bmp", i);
+    snprintf(frame_name, sizeof(char) * 256, "./frames/frame_%04d.bmp", i + offset);
+	//	printf("I am process %d and I am saving%s\n", my_rank, frame_name);
     saveBMP(frame_name, image, renderer_params.width, renderer_params.height);
 
   }
@@ -163,31 +164,3 @@ void writeTimesToTextFile(double* buffer, int p){
   }
   fclose(file);
   }
-//MPI_Gather(&mytime, 1, MPI_DOUBLE, rbuf, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-
-//        MPI_Request myReq;
-//        MPI_Irecv(&nextProcess, 1, MPI_INT, MPI_ANY_SOURCE,
-//          MPI_ANY_TAG, MPI_COMM_WORLD, &myReq);
-//        MPI_Wait(&myReq, &status);
-//        MPI_Isend(tempStart, strlen(tempStart) + 1, MPI_BYTE,
-//          status.MPI_SOURCE, tag, MPI_COMM_WORLD, &myReq);
-//        MPI_Wait(&myReq, MPI_STATUS_IGNORE);
-//        MPI_Isend(tempEnd, strlen(tempEnd) + 1, MPI_BYTE,
-//          status.MPI_SOURCE, tag, MPI_COMM_WORLD, &myReq);
-//        MPI_Wait(&myReq, MPI_STATUS_IGNORE);
-
-//      MPI_Request myReq;
-//      MPI_Isend(&my_rank,1,MPI_INT, 0, tag, MPI_COMM_WORLD, &myReq);
-//      MPI_Wait(&myReq, &status);
-//      MPI_Probe(0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-//      MPI_Get_count(&status, MPI_BYTE, &bufferSize);
-//      MPI_Irecv(startStr,bufferSize, MPI_BYTE, 0, MPI_ANY_TAG,
-//        MPI_COMM_WORLD, &myReq);
-
-//      MPI_Wait(&myReq, &status);
-//      MPI_Probe(0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-//      MPI_Get_count(&status, MPI_BYTE, &bufferSize);
-//      MPI_Irecv(endStr,bufferSize, MPI_BYTE, 0, MPI_ANY_TAG,
-//        MPI_COMM_WORLD, &myReq);
-//      MPI_Wait(&myReq, &status);
-//  MPI_Gather(&mytime, 1, MPI_DOUBLE, rbuf, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
