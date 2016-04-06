@@ -29,13 +29,14 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#define MAX_FRAMES 7200
+#define MAX_FRAMES  7200
+#define AUTO_FRAMES 10
 
-void getParameters(char *filename, CameraParams *camera_params, RenderParams *renderer_params,
-			 MandelBoxParams *mandelBox_paramsP);
+void getParameters(char *filename, RenderParams *renderer_params, MandelBoxParams *mandelBox_paramsP);
 void getPath      (char *filename, CameraParams *camera_path, int *len);
+void getNextFrame (CameraParams * next_frame, RenderParams * renderer_params, float * dist_matrix);
 void init3D       (CameraParams *camera_params, const RenderParams *renderer_params);
-void renderFractal(const CameraParams &camera_params, const RenderParams &renderer_params, unsigned char* image);
+void renderFractal(const CameraParams &camera_params, const RenderParams &renderer_params, unsigned char* image, float * dist_matrix);
 void saveBMP      (const char* filename, const unsigned char* image, int width, int height);
 
 
@@ -51,48 +52,75 @@ int main(int argc, char** argv)
 	{
 		mkdir("frames", 0700);
 	}
-	else 
+	else if (S_ISDIR(s.st_mode))
 	{
-		if(S_ISDIR(s.st_mode))
-		{
 		/* it's a dir */
-		} else {
-		/* exists but is no dir */
-		}
-	}
-	assert(argc >= 2);
-	char* path;
-	if (argc == 3)
-	{
-		path = (char*)malloc(sizeof(char) * (strlen(argv[2]) + 1));
-		memcpy(path, argv[2], strlen(argv[2]) + 1);
-		printf("%s\n", path);
 	}
 	else
 	{
-		path = (char*)malloc(sizeof(char) * (strlen("path.dat") + 1));
-		sprintf(path, "path.dat");
-		printf("%s\n", path);
+		/* exists but is no dir */
 	}
 
+	assert(argc >= 2);
+
+	char* path;
+	CameraParams * camera_path;
+	CameraParams * next_frame;
 	RenderParams renderer_params;
-	CameraParams *camera_path = (CameraParams*)malloc(MAX_FRAMES*sizeof(CameraParams));
-	assert(camera_path);
 	int nframes;
 	char frame_name[256];
 
-	getParameters(argv[1], &camera_path[0], &renderer_params, &mandelBox_params);
+	char auto_path;
 
-	getPath(path, camera_path, &nframes);
+	getParameters(argv[1], &renderer_params, &mandelBox_params);
 
+	if (argc == 3)
+	{
+		auto_path = false;
+
+		camera_path = (CameraParams*)malloc(MAX_FRAMES*sizeof(CameraParams));
+		assert(camera_path);
+		
+		path = (char*)malloc(sizeof(char) * (strlen(argv[2]) + 1));
+		memcpy(path, argv[2], strlen(argv[2]) + 1);
+		printf("%s\n", path);
+		
+		getPath(path, camera_path, &nframes);
+	}
+	else
+	{
+		auto_path = true;
+
+		next_frame = (CameraParams*)malloc(sizeof(CameraParams));
+
+		path = (char*)malloc(sizeof(char) * (strlen("auto_start.dat") + 1));
+		sprintf(path, "auto_path.dat");
+		printf("%s\n", path);
+
+		getPath(path, next_frame, &nframes);
+
+		nframes = AUTO_FRAMES;
+	}
 
 	int image_size = renderer_params.width * renderer_params.height;
 	unsigned char *image = (unsigned char*)malloc(3*image_size*sizeof(unsigned char));
+	float * dist_matrix = (float *)malloc(image_size * sizeof(float));
 
 	for (int i = 0; i < nframes; ++i)
 	{
-		init3D(&camera_path[i], &renderer_params);
-		renderFractal(camera_path[i], renderer_params, image);
+		if (auto_path == true)
+		{
+			init3D(next_frame, &renderer_params);
+			renderFractal(*next_frame, renderer_params, image, dist_matrix);
+			getNextFrame(next_frame, &renderer_params, dist_matrix);
+		}
+		else
+		{
+			init3D(&camera_path[i], &renderer_params);
+			renderFractal(camera_path[i], renderer_params, image, dist_matrix);
+		}
+
+		// printf("frame = %d\tzero dist = %f\tcentre dist = %f\n", i, dist_matrix[0], dist_matrix[(image_size / 2) - (renderer_params.width / 2)]);
 
 		//TODO create render directory from input
 		//TODO create starting name from number from input (in case of previously generated frames)
@@ -101,7 +129,15 @@ int main(int argc, char** argv)
 
 	}
 
+	printf("done\n");
+
 	free(image);
+	free(dist_matrix);
+	if (auto_path == false)
+	{
+		free(camera_path);
+	}
+	free(path);
 
 	return 0;
 }

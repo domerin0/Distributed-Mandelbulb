@@ -29,7 +29,7 @@
 
 static char buf[BUF_SIZE];
 
-void getParameters(char *filename, CameraParams *camP, RenderParams *renP, MandelBoxParams *boxP)
+void getParameters(char *filename, RenderParams *renP, MandelBoxParams *boxP)
 {
 	FILE *fp;
 	int ret;

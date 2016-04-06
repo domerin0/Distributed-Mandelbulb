@@ -20,9 +20,15 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <string.h>
+#ifdef _OPENACC
+#include <accelmath.h>
+#else
+#include <math.h>
+#endif
 #include "3d.h"
+
+# define M_PI   3.14159265358979323846  /* pi */
 
 //---------------------------------------------------------------------------------------------
 //when projection and modelview matricies are static (computed only once, and camera does not mover)
