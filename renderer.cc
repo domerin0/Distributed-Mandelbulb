@@ -120,7 +120,7 @@ void renderFractal(const CameraParams &camera_params, const RenderParams &render
   pixelData pix_data;
   float farPoint[3];
 
-  #pragma acc data copyout(image[0:3*n], dist_matrix[0:n]) copyin(eps, from, renderer_params1, mandelBox_params, viewport[:size1], matInvProjModel[:size2])
+  #pragma acc data copyout(image[0:3*n], dist_matrix[0:4*n]) copyin(eps, from, renderer_params1, mandelBox_params, viewport[:size1], matInvProjModel[:size2])
   {
   #pragma acc parallel loop independent private(color, to, pix_data, farPoint) //present(image, eps, from, renderer_params1, mandelBox_params, viewport, matInvProjModel)
   for(int j = 0; j < height; j++)
@@ -140,7 +140,7 @@ void renderFractal(const CameraParams &camera_params, const RenderParams &render
 
       NORMALIZE(to);
 
-      rayMarch(renderer_params1, from, to, eps, pix_data, mandelBox_params, &dist_matrix[(j * width) + i]);
+      rayMarch(renderer_params1, from, to, eps, pix_data, mandelBox_params, &dist_matrix[(4 * j * width) + (4 * i)]);
 
       getColour(pix_data,renderer_params1, from, to, color);
 

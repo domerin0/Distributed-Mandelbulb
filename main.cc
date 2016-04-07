@@ -30,7 +30,7 @@
 #include <unistd.h>
 
 #define MAX_FRAMES  7200
-#define AUTO_FRAMES 100
+#define AUTO_FRAMES 500
 
 void getParameters(char *filename, RenderParams *renderer_params, MandelBoxParams *mandelBox_paramsP);
 void getPath      (char *filename, CameraParams *camera_path, int *len);
@@ -104,7 +104,7 @@ int main(int argc, char** argv)
 
 	int image_size = renderer_params.width * renderer_params.height;
 	unsigned char *image = (unsigned char*)malloc(3*image_size*sizeof(unsigned char));
-	float * dist_matrix = (float *)malloc(image_size * sizeof(float));
+	float * dist_matrix = (float *)malloc(4 * image_size * sizeof(float));
 
 	for (int i = 0; i < nframes; ++i)
 	{
@@ -120,7 +120,7 @@ int main(int argc, char** argv)
 			renderFractal(camera_path[i], renderer_params, image, dist_matrix);
 		}
 
-		// printf("frame = %d\tzero dist = %f\tcentre dist = %f\n", i, dist_matrix[0], dist_matrix[(image_size / 2) - (renderer_params.width / 2)]);
+		// printf("frame = %d\tzero dist = %f\t x = %f\ty = %f\tz = %f\n", i, dist_matrix[0], dist_matrix[1], dist_matrix[2], dist_matrix[3]);
 
 		//TODO create render directory from input
 		//TODO create starting name from number from input (in case of previously generated frames)

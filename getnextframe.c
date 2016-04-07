@@ -28,26 +28,36 @@ void getNextFrame(CameraParams * next_frame, RenderParams * renderer_params, flo
 	// printf("direction of largest distance x = %f, y = %f\n",
 	// 	next_frame->camTarget[0],
 	// 	next_frame->camPos[0]);
-	int i,j, x, y;
+	int i,j;
+	vec3 new_target;
 	//buffer distance to walls
 	float max_dist = 0.1;
-	for (i = 0 ; i < renderer_params->height ; i++){
-		for(j = 0 ; j < renderer_params->width ; j ++){
-			if(max_dist < dist_matrix[(j *renderer_params->height) + i])
-				max_dist = dist_matrix[(j *renderer_params->height) + i];
-				x = j;
-				y = i;
+	for (i = 0 ; i < renderer_params->height ; i++)
+	{
+		for(j = 0 ; j < renderer_params->width ; j++)
+		{
+			if(max_dist < dist_matrix[(4 * i * renderer_params->width) + (4 * j)])
+			{
+				max_dist = dist_matrix[(4 * i * renderer_params->width) + (4 * j)];
+				new_target.x = dist_matrix[(4 * i * renderer_params->width) + (4 * j) + 1];
+				new_target.y = dist_matrix[(4 * i * renderer_params->width) + (4 * j) + 2];
+				new_target.z = dist_matrix[(4 * i * renderer_params->width) + (4 * j) + 3];
+			}
+				
 		}
 	}
 
-	float xTheta = x * ((2 * PI) / renderer_params->width);
-	float yTheta = y *((2 * PI) / renderer_params->height);
+	next_frame->camTarget[0] *= 0.98;
+	next_frame->camTarget[1] *= 0.98;
+	next_frame->camTarget[2] *= 0.98;	
 
-	// printf("xtheta = %f, ytheta = %f\n", xTheta * PI / 180, yTheta * 180 / PI);
+	MULT_FLOAT(new_target, new_target, 0.02);
 
-	rotateVec(next_frame, xTheta, yTheta);
+	next_frame->camTarget[0] += new_target.x;
+	next_frame->camTarget[1] += new_target.y;
+	next_frame->camTarget[2] += new_target.z;	
 
-	if(max_dist > STEP_SIZE){
+	if(max_dist > 10 * STEP_SIZE){
 		moveVec(next_frame, max_dist);
 	}
 }
