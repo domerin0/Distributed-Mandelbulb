@@ -30,7 +30,7 @@
 #include <unistd.h>
 
 #define MAX_FRAMES  7200
-#define AUTO_FRAMES 10
+#define AUTO_FRAMES 100
 
 void getParameters(char *filename, RenderParams *renderer_params, MandelBoxParams *mandelBox_paramsP);
 void getPath      (char *filename, CameraParams *camera_path, int *len);

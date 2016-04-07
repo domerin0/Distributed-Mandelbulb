@@ -14,6 +14,8 @@
 #include "renderer.h"
 #include "camera.h"
 
+#define STEP_SIZE 0.001
+
 #define STEP_EPSILON 1.1052
 #define STEP_THETA 0.001
 #define PI 3.141592654
@@ -23,9 +25,9 @@ inline void rotateVec(CameraParams * next_frame, float xTheta, float yTheta);
 
 void getNextFrame(CameraParams * next_frame, RenderParams * renderer_params, float * dist_matrix)
 {
-	printf("direction of largest distance x = %f, y = %f\n",
-		next_frame->camTarget[0],
-		next_frame->camPos[0]);
+	// printf("direction of largest distance x = %f, y = %f\n",
+	// 	next_frame->camTarget[0],
+	// 	next_frame->camPos[0]);
 	int i,j, x, y;
 	//buffer distance to walls
 	float max_dist = 0.1;
@@ -41,11 +43,11 @@ void getNextFrame(CameraParams * next_frame, RenderParams * renderer_params, flo
 	float xTheta = x * ((2 * PI) / renderer_params->width);
 	float yTheta = y *((2 * PI) / renderer_params->height);
 
-	printf("xtheta = %f, ytheta = %f\n", xTheta * PI / 180, yTheta * 180 / PI);
+	// printf("xtheta = %f, ytheta = %f\n", xTheta * PI / 180, yTheta * 180 / PI);
 
 	rotateVec(next_frame, xTheta, yTheta);
 
-	if(max_dist > 0.1){
+	if(max_dist > STEP_SIZE){
 		moveVec(next_frame, max_dist);
 	}
 }
@@ -72,13 +74,13 @@ inline void rotateVec(CameraParams * next_frame, float xTheta, float yTheta){
 	float z = next_frame-> camTarget[2] - next_frame-> camPos[2];
 
 	//first rotate in x
-	float newY = y * cos(xTheta) - z * sin(xTheta);
-	float newZ = y * sin(xTheta) + z * cos(xTheta);
+	float newY = y * cosf(xTheta) - z * sinf(xTheta);
+	float newZ = y * sinf(xTheta) + z * cosf(xTheta);
 
 	//then rotate in y
-	float newX = x * cos(yTheta) - z * sin(yTheta);
-	newZ = z * cos(yTheta) - x * sin(yTheta);
-	printf("y = %f, newy = %f\n", y, newY);
+	float newX = x * cosf(yTheta) - z * sinf(yTheta);
+	newZ = z * cosf(yTheta) - x * sinf(yTheta);
+	// printf("y = %f, newy = %f\n", y, newY);
 	next_frame-> camTarget[0] = newX;
 	next_frame-> camTarget[1] = newY;
 	next_frame-> camTarget[2] = newZ;
@@ -92,9 +94,22 @@ inline void moveVec(CameraParams * next_frame, float max_dist){
 	float y = next_frame-> camTarget[1] - next_frame-> camPos[1];
 	float z = next_frame-> camTarget[2] - next_frame-> camPos[2];
 
-	next_frame-> camPos[0] = next_frame-> camPos[0] + ((x > 0) - (x < 0))*;
-	next_frame-> camPos[1] = next_frame-> camPos[1] + ((y > 0) - (y < 0))*;
-	next_frame-> camPos[2] = next_frame-> camPos[2] + ((z > 0) - (z < 0))*(max_dist);
+	// next_frame-> camPos[0] = next_frame-> camPos[0] + ((x > 0) - (x < 0))*;
+	// next_frame-> camPos[1] = next_frame-> camPos[1] + ((y > 0) - (y < 0))*;
+	// next_frame-> camPos[2] = next_frame-> camPos[2] + ((z > 0) - (z < 0))*(max_dist);
 
+	float mag = sqrtf((x * x) + (y * y) + (z * z));
+	mag *= (1 / STEP_SIZE);
 
+	x = x / mag;
+	y = y / mag;
+	z = z / mag;
+
+	next_frame-> camTarget[0] += x;
+	next_frame-> camTarget[1] += y;
+	next_frame-> camTarget[2] += z;
+
+	next_frame-> camPos[0] += x;
+	next_frame-> camPos[1] += y;
+	next_frame-> camPos[2] += z;
 }
