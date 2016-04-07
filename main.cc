@@ -26,11 +26,13 @@
 #include "mandelbox.h"
 #include <string.h>
 #include <sys/types.h>
+#include <time.h>
+#include <ctime>
 #include <sys/stat.h>
 #include <unistd.h>
 
 #define MAX_FRAMES  7200
-#define AUTO_FRAMES 500
+#define AUTO_FRAMES 800
 
 void getParameters(char *filename, RenderParams *renderer_params, MandelBoxParams *mandelBox_paramsP);
 void getPath      (char *filename, CameraParams *camera_path, int *len);
@@ -44,6 +46,23 @@ MandelBoxParams mandelBox_params;
 
 int main(int argc, char** argv)
 {
+	//struct timeval timerStart;
+	//struct timeval timerEnd;
+	double time_spent;
+
+	#ifdef _OPENMP
+		double p_time;
+		printf("openMP timer starting\n");
+		p_time = omp_get_wtime();
+	//#elif _OPENACC
+	//	printf("openACC starting\n");
+	//	gettimeofday(&timerStart, NULL);
+	#else
+		printf("timer starting\n");
+		clock_t begin, end;
+		begin = clock();
+	#endif
+
 	// adapted from:
 	//http://stackoverflow.com/questions/9314586/c-faster-way-to-check-if-a-directory-exists
 	struct stat s;
@@ -80,11 +99,11 @@ int main(int argc, char** argv)
 
 		camera_path = (CameraParams*)malloc(MAX_FRAMES*sizeof(CameraParams));
 		assert(camera_path);
-		
+
 		path = (char*)malloc(sizeof(char) * (strlen(argv[2]) + 1));
 		memcpy(path, argv[2], strlen(argv[2]) + 1);
 		printf("%s\n", path);
-		
+
 		getPath(path, camera_path, &nframes);
 	}
 	else
@@ -138,6 +157,21 @@ int main(int argc, char** argv)
 		free(camera_path);
 	}
 	free(path);
+
+
+	#ifdef _OPENMP
+		p_time = omp_get_wtime()-p_time;
+		printf("time is %f\n", p_time);
+	//#elif _OPENACC
+	//	gettimeofday(&timerEnd, NULL);
+	//	double time_acc = (timerEnd.tv_sec-timerStart.tv_sec) + (timerEnd.tv_usec - timerEnd.tv_usec)*1e-6;
+	//	printf("time is %f\n", time_acc);
+	#else
+		end = clock();
+		time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+		printf("time is %f\n", time_spent);
+	#endif
+
 
 	return 0;
 }
