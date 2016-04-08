@@ -12,6 +12,7 @@ The timing results are as follows:
 GPU | Resolution | Time for 1 frame
 ----|------------|------------------
 Titan X | 1080p | 0.113s
+Titan X | 4k    | 0.364s
 
 * Note time was obtained by finding average time to generate 1 out of 7200 frames.
 * These times were obtained using a ssd, on a hdd it takes about 20% longer
