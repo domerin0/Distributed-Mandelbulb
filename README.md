@@ -11,10 +11,10 @@ The timing results are as follows:
 
  Device | render 1 frame @ 1080p | render 1 frame @ 4k | speedup (for 4k)
 ----|------------|----------------------|---------------
- 1 core  | 30.05 |  124.5s | -
- 2 cores | 15.44 | 61.71 | 2.02x
- 4 cores  | 8.31 | 33.72 | 3.69x
- 8 cores  | 4.92 | 19.64 | 6.34x
+ 1 core  | 30.05s |  124.5s | -
+ 2 cores | 15.44s | 61.71s | 2.02x
+ 4 cores  | 8.31s | 33.72s | 3.69x
+ 8 cores  | 4.92s | 19.64s | 6.34x
 Titan X  | 0.113s | 0.364s | 341.76x
  
 * the CPU used was a AMD FX-9590 Vishera 8-Core 4.7 GHz
