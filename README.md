@@ -19,4 +19,4 @@ Titan X | 4k    | 0.364s
 
 ###Results
 
-Video [link](https://youtu.be/fnS-nIbzeyI). 
+Video [link](https://youtu.be/-fkmAzlNoks). 
