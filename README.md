@@ -17,7 +17,7 @@ The timing results are as follows:
  8 cores  | 4.92s | 19.64s | 6.34x
 Titan X  | 0.113s | 0.364s | 341.76x
  
-* the CPU used was a AMD FX-9590 Vishera 8-Core 4.7 GHz
+* the CPU used was a AMD FX-9590 Vishera 8-Core 4.7 GHz, on a machine with 16gb of RAM.
 * CPU parallelization was acheived using openMP
 * Time was obtained by finding average time to generate 1 out of 7200 frames on GPU, and 1 out of 10 on CPU.
 * These times were obtained using a ssd, on a hdd it takes about 20% longer
