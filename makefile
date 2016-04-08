@@ -20,9 +20,9 @@ acc: LDFLAGS=-acc -ta=tesla:cc50
 acc: $(OBJS)
 	$(CC) $(LDFLAGS) -o$(PROGRAM_NAME) $? -lm
 
-omp: CFLAGS=-O2
-omp: CXXFLAGS=-O2
-omp: LDFLAGS=
+omp: CFLAGS= -O2 -mp
+omp: CXXFLAGS= -O2 -mp
+omp: LDFLAGS= -mp
 omp:$(OBJS)
 	$(CC) $(LDFLAGS) -o $(PROGRAM_NAME) $? -lgomp -lm
 

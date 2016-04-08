@@ -32,7 +32,7 @@
 #include <unistd.h>
 
 #define MAX_FRAMES  7200
-#define AUTO_FRAMES 800
+#define AUTO_FRAMES 1
 
 void getParameters(char *filename, RenderParams *renderer_params, MandelBoxParams *mandelBox_paramsP);
 void getPath      (char *filename, CameraParams *camera_path, int *len);
@@ -51,6 +51,9 @@ int main(int argc, char** argv)
 	double time_spent;
 
 	#ifdef _OPENMP
+		int num_threads = atoi(argv[3]);
+		omp_set_num_threads(num_threads);
+		printf("num threads %d\n",num_threads);
 		double p_time;
 		printf("openMP timer starting\n");
 		p_time = omp_get_wtime();

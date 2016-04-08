@@ -49,17 +49,17 @@ void local_UnProject(float winX, float winY, const int * viewport, const float *
 {
   //Transformation vectors
   float in[4], out[4];
-  
+
   //Transformation of normalized coordinates between -1 and 1
   in[0]=(winX-(float)(viewport[0]))/(float)(viewport[2])*2.0-1.0;
   in[1]=(winY-(float)(viewport[1]))/(float)(viewport[3])*2.0-1.0;
   in[2]=2.0-1.0;
   in[3]=1.0;
-  
+
   //Objects coordinates
   const float *matrix = matInvProjModel;
   MultiplyMatrixByVector1(out, matrix, in);
-  
+
   if(out[3]==0.0)
     return;
 
@@ -115,13 +115,13 @@ void renderFractal(const CameraParams &camera_params, const RenderParams &render
   // int size3 = sizeof(vec3);
 
   RenderParams renderer_params1 = renderer_params;
-  
+
   vec3 color, to;
   pixelData pix_data;
   float farPoint[3];
-
   #pragma acc data copyout(image[0:3*n], dist_matrix[0:4*n]) copyin(eps, from, renderer_params1, mandelBox_params, viewport[:size1], matInvProjModel[:size2])
   {
+  #pragma omp parallel for collapse(2) private(color, to, pix_data, farPoint)
   #pragma acc parallel loop independent private(color, to, pix_data, farPoint) //present(image, eps, from, renderer_params1, mandelBox_params, viewport, matInvProjModel)
   for(int j = 0; j < height; j++)
   {
