@@ -49,17 +49,17 @@ void local_UnProject(float winX, float winY, const int * viewport, const float *
 {
   //Transformation vectors
   float in[4], out[4];
-  
+
   //Transformation of normalized coordinates between -1 and 1
   in[0]=(winX-(float)(viewport[0]))/(float)(viewport[2])*2.0-1.0;
   in[1]=(winY-(float)(viewport[1]))/(float)(viewport[3])*2.0-1.0;
   in[2]=2.0-1.0;
   in[3]=1.0;
-  
+
   //Objects coordinates
   const float *matrix = matInvProjModel;
   MultiplyMatrixByVector1(out, matrix, in);
-  
+
   if(out[3]==0.0)
     return;
 
@@ -73,14 +73,15 @@ void local_UnProject(float winX, float winY, const int * viewport, const float *
 
 
 #pragma acc routine seq
-extern void rayMarch (const RenderParams &render_params, const vec3 &from, const vec3  &to, float eps, pixelData &pix_data, MandelBoxParams &box_params);
+extern void rayMarch (const RenderParams &render_params, const vec3 &from, const vec3  &to, \
+                      float eps, pixelData &pix_data, MandelBoxParams &box_params, float * tot_dist);
 #pragma acc routine seq
 extern void getColour(const pixelData &pixData, const RenderParams &render_params,
           const vec3 &from, const vec3  &direction, vec3 &hitcolor);
 
 
 void renderFractal(const CameraParams &camera_params, const RenderParams &renderer_params,
-		   unsigned char* image)
+		               unsigned char* image, float * dist_matrix)
 {
 
   const float eps = powf(10.0, renderer_params.detail);
@@ -114,42 +115,40 @@ void renderFractal(const CameraParams &camera_params, const RenderParams &render
   // int size3 = sizeof(vec3);
 
   RenderParams renderer_params1 = renderer_params;
-  
+
   vec3 color, to;
   pixelData pix_data;
   float farPoint[3];
-
-  #pragma acc data copyout(image[0:3*n]) copyin(eps, from, renderer_params1, mandelBox_params, viewport[:size1], matInvProjModel[:size2])
+  #pragma acc data copyout(image[0:3*n], dist_matrix[0:4*n]) copyin(eps, from, renderer_params1, mandelBox_params, viewport[:size1], matInvProjModel[:size2])
   {
-  // #pragma acc parallel //num_gangs(1024) num_workers(128)
-  {
+  #pragma omp parallel for collapse(2) private(color, to, pix_data, farPoint)
   #pragma acc parallel loop independent private(color, to, pix_data, farPoint) //present(image, eps, from, renderer_params1, mandelBox_params, viewport, matInvProjModel)
   for(int j = 0; j < height; j++)
+  {
+    //for each column pixel in the row
+    //#pragma acc for independent private(j) shared (image[0:3*n])
+    #pragma acc loop private(color, to, pix_data, farPoint)
+    for(int i = 0; i < width; i++)
     {
-      //for each column pixel in the row
-      //#pragma acc for independent private(j) shared (image[0:3*n])
-      #pragma acc loop private(color, to, pix_data, farPoint)
-      for(int i = 0; i < width; i++)
-      {
-  
-        local_UnProject(i, j, viewport, matInvProjModel, farPoint);
-      
-        to.x = farPoint[0] - from.x;
-        to.y = farPoint[1] - from.y;
-        to.z = farPoint[2] - from.z;
- 
-        NORMALIZE(to);
- 
-        rayMarch(renderer_params1, from, to, eps, pix_data, mandelBox_params);
-        
-        getColour(pix_data,renderer_params1, from, to, color);
-        
-        int k = (j * width + i)*3;
-        image[k+2] = (unsigned char)(color.x * 255);
-        image[k+1] = (unsigned char)(color.y * 255);
-        image[k]   = (unsigned char)(color.z * 255);
-     }
-   }
+      // float * dist;
+
+      local_UnProject(i, j, viewport, matInvProjModel, farPoint);
+
+      to.x = farPoint[0] - from.x;
+      to.y = farPoint[1] - from.y;
+      to.z = farPoint[2] - from.z;
+
+      NORMALIZE(to);
+
+      rayMarch(renderer_params1, from, to, eps, pix_data, mandelBox_params, &dist_matrix[(4 * j * width) + (4 * i)]);
+
+      getColour(pix_data,renderer_params1, from, to, color);
+
+      int k = (j * width + i)*3;
+      image[k+2] = (unsigned char)(color.x * 255);
+      image[k+1] = (unsigned char)(color.y * 255);
+      image[k]   = (unsigned char)(color.z * 255);
+    }
   }
   }
   // printf("completed frame\n");

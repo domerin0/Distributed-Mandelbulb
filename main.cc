@@ -26,16 +26,19 @@
 #include "mandelbox.h"
 #include <string.h>
 #include <sys/types.h>
+#include <time.h>
+#include <ctime>
 #include <sys/stat.h>
 #include <unistd.h>
 
-#define MAX_FRAMES 7200
+#define MAX_FRAMES  7200
+#define AUTO_FRAMES 1
 
-void getParameters(char *filename, CameraParams *camera_params, RenderParams *renderer_params,
-			 MandelBoxParams *mandelBox_paramsP);
+void getParameters(char *filename, RenderParams *renderer_params, MandelBoxParams *mandelBox_paramsP);
 void getPath      (char *filename, CameraParams *camera_path, int *len);
+void getNextFrame (CameraParams * next_frame, RenderParams * renderer_params, float * dist_matrix);
 void init3D       (CameraParams *camera_params, const RenderParams *renderer_params);
-void renderFractal(const CameraParams &camera_params, const RenderParams &renderer_params, unsigned char* image);
+void renderFractal(const CameraParams &camera_params, const RenderParams &renderer_params, unsigned char* image, float * dist_matrix);
 void saveBMP      (const char* filename, const unsigned char* image, int width, int height);
 
 
@@ -43,6 +46,26 @@ MandelBoxParams mandelBox_params;
 
 int main(int argc, char** argv)
 {
+	//struct timeval timerStart;
+	//struct timeval timerEnd;
+	double time_spent;
+
+	#ifdef _OPENMP
+		int num_threads = atoi(argv[3]);
+		omp_set_num_threads(num_threads);
+		printf("num threads %d\n",num_threads);
+		double p_time;
+		printf("openMP timer starting\n");
+		p_time = omp_get_wtime();
+	//#elif _OPENACC
+	//	printf("openACC starting\n");
+	//	gettimeofday(&timerStart, NULL);
+	#else
+		printf("timer starting\n");
+		clock_t begin, end;
+		begin = clock();
+	#endif
+
 	// adapted from:
 	//http://stackoverflow.com/questions/9314586/c-faster-way-to-check-if-a-directory-exists
 	struct stat s;
@@ -51,48 +74,75 @@ int main(int argc, char** argv)
 	{
 		mkdir("frames", 0700);
 	}
-	else 
+	else if (S_ISDIR(s.st_mode))
 	{
-		if(S_ISDIR(s.st_mode))
-		{
 		/* it's a dir */
-		} else {
-		/* exists but is no dir */
-		}
-	}
-	assert(argc >= 2);
-	char* path;
-	if (argc == 3)
-	{
-		path = (char*)malloc(sizeof(char) * (strlen(argv[2]) + 1));
-		memcpy(path, argv[2], strlen(argv[2]) + 1);
-		printf("%s\n", path);
 	}
 	else
 	{
-		path = (char*)malloc(sizeof(char) * (strlen("path.dat") + 1));
-		sprintf(path, "path.dat");
-		printf("%s\n", path);
+		/* exists but is no dir */
 	}
 
+	assert(argc >= 2);
+
+	char* path;
+	CameraParams * camera_path;
+	CameraParams * next_frame;
 	RenderParams renderer_params;
-	CameraParams *camera_path = (CameraParams*)malloc(MAX_FRAMES*sizeof(CameraParams));
-	assert(camera_path);
 	int nframes;
 	char frame_name[256];
 
-	getParameters(argv[1], &camera_path[0], &renderer_params, &mandelBox_params);
+	char auto_path;
 
-	getPath(path, camera_path, &nframes);
+	getParameters(argv[1], &renderer_params, &mandelBox_params);
 
+	if (argc == 3)
+	{
+		auto_path = false;
+
+		camera_path = (CameraParams*)malloc(MAX_FRAMES*sizeof(CameraParams));
+		assert(camera_path);
+
+		path = (char*)malloc(sizeof(char) * (strlen(argv[2]) + 1));
+		memcpy(path, argv[2], strlen(argv[2]) + 1);
+		printf("%s\n", path);
+
+		getPath(path, camera_path, &nframes);
+	}
+	else
+	{
+		auto_path = true;
+
+		next_frame = (CameraParams*)malloc(sizeof(CameraParams));
+
+		path = (char*)malloc(sizeof(char) * (strlen("auto_start.dat") + 1));
+		sprintf(path, "auto_path.dat");
+		printf("%s\n", path);
+
+		getPath(path, next_frame, &nframes);
+
+		nframes = AUTO_FRAMES;
+	}
 
 	int image_size = renderer_params.width * renderer_params.height;
 	unsigned char *image = (unsigned char*)malloc(3*image_size*sizeof(unsigned char));
+	float * dist_matrix = (float *)malloc(4 * image_size * sizeof(float));
 
 	for (int i = 0; i < nframes; ++i)
 	{
-		init3D(&camera_path[i], &renderer_params);
-		renderFractal(camera_path[i], renderer_params, image);
+		if (auto_path == true)
+		{
+			init3D(next_frame, &renderer_params);
+			renderFractal(*next_frame, renderer_params, image, dist_matrix);
+			getNextFrame(next_frame, &renderer_params, dist_matrix);
+		}
+		else
+		{
+			init3D(&camera_path[i], &renderer_params);
+			renderFractal(camera_path[i], renderer_params, image, dist_matrix);
+		}
+
+		// printf("frame = %d\tzero dist = %f\t x = %f\ty = %f\tz = %f\n", i, dist_matrix[0], dist_matrix[1], dist_matrix[2], dist_matrix[3]);
 
 		//TODO create render directory from input
 		//TODO create starting name from number from input (in case of previously generated frames)
@@ -101,7 +151,30 @@ int main(int argc, char** argv)
 
 	}
 
+	printf("done\n");
+
 	free(image);
+	free(dist_matrix);
+	if (auto_path == false)
+	{
+		free(camera_path);
+	}
+	free(path);
+
+
+	#ifdef _OPENMP
+		p_time = omp_get_wtime()-p_time;
+		printf("time is %f\n", p_time);
+	//#elif _OPENACC
+	//	gettimeofday(&timerEnd, NULL);
+	//	double time_acc = (timerEnd.tv_sec-timerStart.tv_sec) + (timerEnd.tv_usec - timerEnd.tv_usec)*1e-6;
+	//	printf("time is %f\n", time_acc);
+	#else
+		end = clock();
+		time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+		printf("time is %f\n", time_spent);
+	#endif
+
 
 	return 0;
 }

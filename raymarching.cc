@@ -36,11 +36,12 @@ extern float MandelBulbDistanceEstimator(const vec3 &p0, MandelBoxParams &params
 void normal (const vec3 & p, vec3 & normal, MandelBoxParams &frac_params);
 
 #pragma acc routine seq
-void rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  &direction, float eps,
-	      pixelData& pix_data, MandelBoxParams &frac_params)
+void rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  &direction, \
+              float eps, pixelData& pix_data, MandelBoxParams &frac_params, float * tot_dist)
 {
   float dist = 0.0;
   float totalDist = 0.0;
+  vec3 z;
 
   // We will adjust the minimum distance based on the current zoom
 
@@ -66,10 +67,15 @@ void rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  &
   }
   while (dist > epsModified && totalDist <= render_params.maxDistance && steps < render_params.maxRaySteps);
 
+  tot_dist[1] = p.x;
+  tot_dist[2] = p.y;
+  tot_dist[3] = p.z;
+
   vec3 hitNormal;
   if (dist < epsModified)
   {
     //we didnt escape
+    tot_dist[0] = totalDist;
     pix_data.escaped = false;
 
     // We hit something, or reached MaxRaySteps
@@ -82,13 +88,17 @@ void rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  &
     normal(hitNormal, pix_data.normal, frac_params);
   }
   else
+  {
     //we have the background colour
     pix_data.escaped = true;
+    tot_dist[0] = -1;
+  }
 }
 
 
 void normal(const vec3 & p, vec3 & normal, MandelBoxParams &frac_params)
 {
+  vec3 z;
   // compute the normal at p
   const float sqrt_mach_eps = 3.4527e-04;
 	float mag = 0.0;
