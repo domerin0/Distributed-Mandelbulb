@@ -24,8 +24,11 @@
 
 \begin{document}
 \maketitle
+\newpage
+\tableofcontents
 
-\section*{Description of Parallelization}
+\newpage
+\section{Description of Parallelization}
 %(10%) description of your parallelization. Discuss how you have parallelized certain portions of the code and the overall implementation. For example, you may precompute the parameters for each frame and then render them independently on more than one GPU. 
 The code can be paralleled in two distinct sections. The first is across the frame and the second is across the path. Parallelization across the frame takes place in \hyperref[subsec:renderer.cc]{renderer.cc} in the nested for loops that iterate over each pixel of the frame. Since the pixels are all data independent of each other this was an ideal place to break off into multiple workers. We used \texttt{acc parallel loop independent private(color, to, pix\_data, farPoint)} around the outer loop and \texttt{ acc loop private(color, to, pix\_data, farPoint)} around the inner loop. Since there are calls to \texttt{local\_UnProject, rayMarch} and \texttt{getColour} we needed to add \texttt{acc routine seq} to their definitions and all the subsequent functions that they called. To improve performance we added a \texttt{data} pragma around the outer loop to reduce the amount of copying between the host and the device. \\
 
@@ -33,10 +36,10 @@ Our program has the ability to generate frames automatically, but a manual path 
 
 The automatic path planner determines the next frame based on the current frame so we do not currently have the ability to separate it between MPI nodes. There is a potential to return the path that the automated path planner used and then if the video needed to be rendered again at higher detail or resolution it could be used as a manual path.
 
-\section*{Frame Generating Algorithm}
+\section{Frame Generating Algorithm}
 %(20%) Describe in sufficient detail your algorithm for generating the frames, starting from the initial time until the end of the frame generation. That is, how you select the parameters for each frame
 
-\section*{MandelBox vs MandelBulb Performance }
+\section{MandelBox vs MandelBulb Performance }
 %(5%) Computing a Mandelbox is generally slower than a Mandelbulb. Explain why. Include here a summary of your computations: GPU(s) used, number of frames, and seconds (in average) per frame.
 %TODO add difference in performance explanation
 Performance using \hyperref[subsec:params_bulb]{params\_bulb.dat}. CPU time averaged over 10 frames and GPU time averaged over 7200 frames. Times include automated path planning and .bmp writes to a solid state hard drive after every frame. There is a consistent 20\% performance penalty from using a mechanical spinning platter hard drive regardless of whether a CPU or GPU is used to generate frames. The time to encode the frames into a video is not included in any of the tables.
@@ -67,19 +70,19 @@ Cores & Time/Frame Av. (s)  & Speed Up & Time/Frame Av. (s) & Speed Up \\
 \hline
 Titan X & 0.11 & 272.73 & 0.36 & 341.76x\\ \hline
 \end{tabular}
-\caption{Mandlebulb Performance and Speedup using Dominick's Desktop (Table: \ref{tab:dd_spec}) }
+\caption{Mandlebulb Performance and Speedup using Dominik's Desktop (Table: \ref{tab:dd_spec}) }
 \end{table}
 
-\section*{Reproduction of Results}
+\section{Reproduction of Results}
 %(5%) An explanation of how one can reproduce your final result. The best would be if by typing make video the final video file is generated, without any other manual intervention.
 Our results can be obtained by typing \texttt{\$ make acc} and executing \texttt{\$ ./mandelbulb \hyperref[subsec:params_bulb]{params\_bulb.dat}} to generate the frames. The path is determined by an automatic path planner. The file \hyperref[subsec:auto_path]{auto\_path.dat} must be in the root directory, it is used as the starting point for the automated path planner. To create a video from the frames type \texttt{\$~ make video}. The video will be created in the \texttt{output} folder of the root directory named \texttt{output.mp4}.
 
-\subsection*{auto\_path.dat}\label{subsec:auto_path}
+\subsection{auto\_path.dat}\label{subsec:auto_path}
 \begin{Verbatim}[fontsize= \footnotesize, tabsize=4]
 0.8 0.11 0.7 0 0 0 0 1 0 1.3
 \end{Verbatim}
 
-\subsection*{params\_bulb.dat}\label{subsec:params_bulb}
+\subsection{params\_bulb.dat}\label{subsec:params_bulb}
 \begin{Verbatim}[fontsize= \footnotesize, tabsize=4]
 # IMAGE
 # width height
@@ -101,11 +104,11 @@ Our results can be obtained by typing \texttt{\$ make acc} and executing \texttt
 image
 \end{Verbatim}
 
-\section*{Source Code}
+\section{Source Code}
 %(5%) Well-documented source code. Insert appropriate comments and descriptions of input and output arguments.
 Note that all code has been converted to single precision floating point arithmetic, uses MPI,  OpenMP, openACC and has completely autonomous path planning.
 
-\subsection*{3d.cc}
+\subsection{3d.cc}
 \begin{Verbatim}[fontsize= \footnotesize, tabsize=4]
 #include <stdio.h>
 #include <stdlib.h>
@@ -507,7 +510,7 @@ void Translate(float *result, float x, float y, float z){
 
 \end{Verbatim}
 
-\subsection*{3d.h}
+\subsection{3d.h}
 \begin{Verbatim}[fontsize= \footnotesize, tabsize=4]
 #ifndef _3d_H
 #define _3d_H
@@ -533,7 +536,7 @@ void   Translate(float *result, float x, float y, float z);
 #endif
 \end{Verbatim}
 
-\subsection*{camera.h}
+\subsection{camera.h}
 \begin{Verbatim}[fontsize= \footnotesize, tabsize=4]
 #ifndef _CAMERA_H
 #define _CAMERA_H
@@ -553,12 +556,12 @@ typedef struct
 #endif
 \end{Verbatim}
 
-\subsection*{color.h}
+\subsection{color.h}
 \begin{Verbatim}[fontsize= \footnotesize, tabsize=4]
 unmodified
 \end{Verbatim}
 
-\subsection*{distance\_est.cc}
+\subsection{distance\_est.cc}
 \begin{Verbatim}[fontsize= \footnotesize, tabsize=4]
 #include "vector3d.h"
 #include "mandelbox.h"
@@ -579,7 +582,7 @@ float DE(vec3 &p)
 }
 \end{Verbatim}
 
-\subsection*{getcolor.cc}
+\subsection{getcolor.cc}
 \begin{Verbatim}[fontsize= \footnotesize, tabsize=4]
 #include "color.h"
 #include "renderer.h"
@@ -658,7 +661,7 @@ void getColour(const pixelData &pixData, const RenderParams &render_params,
 }
 \end{Verbatim}
 
-\subsection*{getnextframe.c}
+\subsection{getnextframe.c}
 \begin{Verbatim}[fontsize= \footnotesize, tabsize=4]
 #include <stdio.h>
 #include <stdlib.h>
@@ -783,7 +786,7 @@ inline void moveVec(CameraParams * next_frame, float max_dist){
 }
 \end{Verbatim}
 
-\subsection*{getparams.c}
+\subsection{getparams.c}
 \begin{Verbatim}[fontsize= \footnotesize, tabsize=4]
 #include <stdio.h>
 #include <stdlib.h>
@@ -858,7 +861,7 @@ void getParameters(char *filename, RenderParams *renP, MandelBoxParams *boxP)
 }
 \end{Verbatim}
 
-\subsection*{getpath.c}
+\subsection{getpath.c}
 \begin{Verbatim}[fontsize= \footnotesize, tabsize=4]
 #include <assert.h>
 #include <stdio.h>
@@ -898,7 +901,7 @@ void getPath(char *filename, CameraParams *path, int *len)
 
 \end{Verbatim}
 
-\subsection*{init3D.c}
+\subsection{init3D.c}
 \begin{Verbatim}[fontsize= \footnotesize, tabsize=4]
 #include "camera.h"
 #include "renderer.h"
@@ -930,7 +933,7 @@ void init3D(CameraParams *camP, const RenderParams *renP)
 }
 \end{Verbatim}
 
-\subsection*{main.cc}
+\subsection{main.cc}
 \begin{Verbatim}[fontsize= \footnotesize, tabsize=4]
 #include <stdlib.h>
 #include <stdio.h>
@@ -1090,7 +1093,7 @@ int main(int argc, char** argv)
 }
 \end{Verbatim}
 
-\subsection*{makefile}
+\subsection{makefile}
 \begin{Verbatim}[fontsize= \footnotesize, tabsize=4]
 CC=pgc++
 CXX=pgc++
@@ -1133,12 +1136,12 @@ video:
 
 \end{Verbatim}
 
-\subsection*{mandelbox.h}
+\subsection{mandelbox.h}
 \begin{Verbatim}[fontsize= \footnotesize, tabsize=4]
 unodified
 \end{Verbatim}
 
-\subsection*{mandelboxde.cc}
+\subsection{mandelboxde.cc}
 \begin{Verbatim}[fontsize= \footnotesize, tabsize=4]
 #include <cmath>
 #include <cstdio>
@@ -1196,7 +1199,7 @@ float MandelBoxDE(const vec3 &p0, const MandelBoxParams &params, float c1, float
 }
 \end{Verbatim}
 
-\subsection*{print.c}
+\subsection{print.c}
 \begin{Verbatim}[fontsize= \footnotesize, tabsize=4]
 #include <stdio.h>
 #include <string.h>
@@ -1224,7 +1227,7 @@ void printProgress( double perc, double time )
 }
 \end{Verbatim}
 
-\subsection*{raymarching.cc}
+\subsection{raymarching.cc}
 \begin{Verbatim}[fontsize= \footnotesize, tabsize=4]
 #include <assert.h>
 #include <algorithm>
@@ -1330,7 +1333,7 @@ void normal(const vec3 & p, vec3 & normal, MandelBoxParams &frac_params)
 
 \end{Verbatim}
 
-\subsection*{renderer.cc}\label{subsec:renderer.cc}
+\subsection{renderer.cc}\label{subsec:renderer.cc}
 \begin{Verbatim}[fontsize= \footnotesize, tabsize=4]
 #include <stdio.h>
 #include <string.h>
@@ -1450,7 +1453,7 @@ void renderFractal(const CameraParams &camera_params, const RenderParams &render
 }
 \end{Verbatim}
 
-\subsection*{renderer.h}
+\subsection{renderer.h}
 \begin{Verbatim}[fontsize= \footnotesize, tabsize=4]
 #ifndef _RENMandelBoxDERER_H
 #define _RENMandelBoxDERER_H
@@ -1471,17 +1474,17 @@ typedef struct
 #endif
 \end{Verbatim}
 
-\subsection*{savebmp.c}
+\subsection{savebmp.c}
 \begin{Verbatim}[fontsize= \footnotesize, tabsize=4]
 unmodified
 \end{Verbatim}
 
-\subsection*{timing.c}
+\subsection{timing.c}
 \begin{Verbatim}[fontsize= \footnotesize, tabsize=4]
 unmodified
 \end{Verbatim}
 
-\subsection*{vector3d.h} 
+\subsection{vector3d.h} 
 \begin{Verbatim}[fontsize= \footnotesize, tabsize=4]
 #ifndef vec3_h
 #define vec3_h
