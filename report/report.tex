@@ -28,7 +28,10 @@
 \section*{Description of Parallelization}
 %(10%) description of your parallelization. Discuss how you have parallelized certain portions of the code and the overall implementation. For example, you may precompute the parameters for each frame and then render them independently on more than one GPU. 
 The code can be paralleled in two distinct sections. The first is across the frame and the second is across the path. Parallelization across the frame takes place in \hyperref[subsec:renderer.cc]{renderer.cc} in the nested for loops that iterate over each pixel of the frame. Since the pixels are all data independent of each other this was an ideal place to break off into multiple workers. We used \texttt{acc parallel loop independent private(color, to, pix\_data, farPoint)} around the outer loop and \texttt{ acc loop private(color, to, pix\_data, farPoint)} around the inner loop. Since there are calls to \texttt{local\_UnProject, rayMarch} and \texttt{getColour} we needed to add \texttt{acc routine seq} to their definitions and all the subsequent functions that they called. To improve performance we added a \texttt{data} pragma around the outer loop to reduce the amount of copying between the host and the device. \\
-Our program has the ability to generate frames automatically, but a manual path file can also be used. The manual path file is a list of camera positions, look at vectors, up vectors and field of views.
+
+Our program has the ability to generate frames automatically, but a manual path file can also be used. Each line in the path file contains a camera position, look at vector, up vector and field of view. If a path file is given as an input argument, our program will create an array of camera parameters and generate a video frame for every camera parameter given. Since each frame is also data independent of each other we can scatter the array across MPI nodes to compute sections of the path in parallel. \\
+
+The automatic path planner determines the next frame based on the current frame so we do not currently have the ability to separate it between MPI nodes. There is a potential to return the path that the automated path planner used and then if the video needed to be rendered again at higher detail or resolution it could be used as a manual path.
 
 \section*{Frame Generating Algorithm}
 %(20%) Describe in sufficient detail your algorithm for generating the frames, starting from the initial time until the end of the frame generation. That is, how you select the parameters for each frame
@@ -69,7 +72,13 @@ Titan X & 0.11 & 272.73 & 0.36 & 341.76x\\ \hline
 
 \section*{Reproduction of Results}
 %(5%) An explanation of how one can reproduce your final result. The best would be if by typing make video the final video file is generated, without any other manual intervention.
-Our results can be obtained by executing \texttt{\$ ./mandelbulb params\_buld.dat} to generate the frames. By default the path is determined by an automatic path planner. To create a video from the frames type \texttt{\$ make video}. The video will be created in the \texttt{output} folder of the root directory.  
+Our results can be obtained by typing \texttt{\$ make acc} and executing \texttt{\$ ./mandelbulb \hyperref[subsec:params_bulb]{params\_bulb.dat}} to generate the frames. The path is determined by an automatic path planner. The file \hyperref[subsec:auto_path]{auto\_path.dat} must be in the root directory, it is used as the starting point for the automated path planner. To create a video from the frames type \texttt{\$~ make video}. The video will be created in the \texttt{output} folder of the root directory named \texttt{output.mp4}.
+
+\subsection*{auto\_path.dat}\label{subsec:auto_path}
+\begin{Verbatim}[fontsize= \footnotesize, tabsize=4]
+0.8 0.11 0.7 0 0 0 0 1 0 1.3
+\end{Verbatim}
+
 \subsection*{params\_bulb.dat}\label{subsec:params_bulb}
 \begin{Verbatim}[fontsize= \footnotesize, tabsize=4]
 # IMAGE
