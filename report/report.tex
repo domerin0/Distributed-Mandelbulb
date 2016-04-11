@@ -47,7 +47,7 @@ An automatic path planner was added to the project. To use, first the program is
 
 It works by computing a distance matrix, where every element in the matrix is a distance value to the corresponding pixel. It labels grey space as -1. This distance matrix, along with the previous frame's info is fed into \texttt{getNextFrame} in \hyperref[subsec:getnextframe.c]{getnextframe.c}. Inside this function, it implements a fairly naive path planning. It finds the farthest pixel in the distance matrix (that isn't gray) and moves the camTarget a small step size towards it. Then in a second function call, it moves the camPos a small step size in the direction of the new camTarget. The behaviour of this implementation is illustrated in the video linked on the title page of this report.
 
-\section{MandelBox vs MandelBulb Performance }
+\section{MandelBulb Performance}
 %(5%) Computing a Mandelbox is generally slower than a Mandelbulb. Explain why. Include here a summary of your computations: GPU(s) used, number of frames, and seconds (in average) per frame.
 %TODO add difference in performance explanation
 Performance using \hyperref[subsec:params_bulb]{params\_bulb.dat}. CPU time averaged over 10 frames and GPU time averaged over 7200 frames. Times include automated path planning and .bmp writes to a solid state hard drive after every frame. There is a consistent 20\% performance penalty from using a mechanical spinning platter hard drive regardless of whether a CPU or GPU is used to generate frames. The time to encode the frames into a video is not included in any of the tables.
@@ -82,7 +82,9 @@ Titan X & 0.11 & 272.73x & 0.36 & 341.76x\\ \hline
 
 \section{Reproduction of Results}
 %(5%) An explanation of how one can reproduce your final result. The best would be if by typing make video the final video file is generated, without any other manual intervention.
-Our results can be obtained by typing \texttt{\$ make acc} and executing \texttt{\$ ./mandelbulb \hyperref[subsec:params_bulb]{params\_bulb.dat}} to generate the frames. The path is determined by an automatic path planner. The file \texttt{\hyperref[subsec:auto_path]{auto\_path.dat}} must be in the root directory, it is used as the starting point for the automated path planner. To create a video from the frames type \texttt{\$~ make video}. The video will be created in the \texttt{output} folder of the root directory named \texttt{output.mp4}.
+Our results can be obtained by typing \texttt{\$ make acc} and executing \texttt{\$ ./mandelbulb \hyperref[subsec:params_bulb]{params\_bulb.dat}} to generate the frames. The path is determined by an automatic path planner. The file \texttt{\hyperref[subsec:auto_path]{auto\_path.dat}} must be in the root directory, it is used as the starting point for the automated path planner. To create a video from the frames type \texttt{\$~ make video}. The video will be created in the \texttt{output} folder of the root directory named \texttt{output.mp4}.\\
+\newline
+Results were obtained using PGI tools 16.1, and CUDA 7.5 targeting cc50 accelerators.  Currently this code base does not compile on the Tesla K40.  For a demonstration, please contact one of the group members.
 
 \subsection{auto\_path.dat}\label{subsec:auto_path}
 \begin{Verbatim}[fontsize= \footnotesize, tabsize=4]
@@ -956,7 +958,7 @@ void init3D(CameraParams *camP, const RenderParams *renP)
 #include <unistd.h>
 
 #define MAX_FRAMES  7200
-#define AUTO_FRAMES 1
+#define AUTO_FRAMES 7200
 
 void getParameters(char *filename, RenderParams *renderer_params, MandelBoxParams *mandelBox_paramsP);
 void getPath      (char *filename, CameraParams *camera_path, int *len);
@@ -975,15 +977,9 @@ int main(int argc, char** argv)
 	double time_spent;
 
 	#ifdef _OPENMP
-		int num_threads = atoi(argv[3]);
-		omp_set_num_threads(num_threads);
-		printf("num threads %d\n",num_threads);
 		double p_time;
 		printf("openMP timer starting\n");
 		p_time = omp_get_wtime();
-	//#elif _OPENACC
-	//	printf("openACC starting\n");
-	//	gettimeofday(&timerStart, NULL);
 	#else
 		printf("timer starting\n");
 		clock_t begin, end;
@@ -1007,7 +1003,7 @@ int main(int argc, char** argv)
 		/* exists but is no dir */
 	}
 
-	assert(argc >= 2);
+	assert(argc == 2 | argc == 3);
 
 	char* path;
 	CameraParams * camera_path;
