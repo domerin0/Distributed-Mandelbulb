@@ -75,14 +75,14 @@ Cores & Time/Frame Av. (s)  & Speed Up & Time/Frame Av. (s) & Speed Up \\
 4 & 8.31  & 3.61x & 33.72  & 3.69x\\
 8 & 4.92  & 6.11x & 19.64  & 6.34x\\ 
 \hline
-Titan X & 0.11 & 272.73 & 0.36 & 341.76x\\ \hline
+Titan X & 0.11 & 272.73x & 0.36 & 341.76x\\ \hline
 \end{tabular}
 \caption{Mandlebulb Performance and Speedup using Personal Desktop (Table: \ref{tab:dd_spec}) }
 \end{table}
 
 \section{Reproduction of Results}
 %(5%) An explanation of how one can reproduce your final result. The best would be if by typing make video the final video file is generated, without any other manual intervention.
-Our results can be obtained by typing \texttt{\$ make acc} and executing \texttt{\$ ./mandelbulb \hyperref[subsec:params_bulb]{params\_bulb.dat}} to generate the frames. The path is determined by an automatic path planner. The file \hyperref[subsec:auto_path]{auto\_path.dat} must be in the root directory, it is used as the starting point for the automated path planner. To create a video from the frames type \texttt{\$~ make video}. The video will be created in the \texttt{output} folder of the root directory named \texttt{output.mp4}.
+Our results can be obtained by typing \texttt{\$ make acc} and executing \texttt{\$ ./mandelbulb \hyperref[subsec:params_bulb]{params\_bulb.dat}} to generate the frames. The path is determined by an automatic path planner. The file \texttt{\hyperref[subsec:auto_path]{auto\_path.dat}} must be in the root directory, it is used as the starting point for the automated path planner. To create a video from the frames type \texttt{\$~ make video}. The video will be created in the \texttt{output} folder of the root directory named \texttt{output.mp4}.
 
 \subsection{auto\_path.dat}\label{subsec:auto_path}
 \begin{Verbatim}[fontsize= \footnotesize, tabsize=4]
