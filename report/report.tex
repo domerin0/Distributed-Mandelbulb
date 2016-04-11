@@ -24,7 +24,10 @@
 \author{Stephen Wynn-Williams \\ Dominik Kaukinen \\Logan Crump \\ Rob Epp }
 \begin{document}
 \maketitle
-\url{https://www.youtube.com/watch?v=-fkmAzlNoks}
+\begin{center}
+\textbf{Results:} \url{https://www.youtube.com/watch?v=-fkmAzlNoks}
+\end{center}
+
 
 \newpage
 \tableofcontents
@@ -32,7 +35,7 @@
 \newpage
 \section{Description of Parallelization}
 %(10%) description of your parallelization. Discuss how you have parallelized certain portions of the code and the overall implementation. For example, you may precompute the parameters for each frame and then render them independently on more than one GPU. 
-The code can be paralleled in two distinct sections. The first is across the frame and the second is across the path. Parallelization across the frame takes place in \hyperref[subsec:renderer.cc]{renderer.cc} in the nested for loops that iterate over each pixel of the frame. Since the pixels are all data independent of each other this was an ideal place to break off into multiple workers. We used \texttt{acc parallel loop independent private(color, to, pix\_data, farPoint)} around the outer loop and \texttt{ acc loop private(color, to, pix\_data, farPoint)} around the inner loop. Since there are calls to \texttt{local\_UnProject, rayMarch} and \texttt{getColour} we needed to add \texttt{acc routine seq} to their definitions and all the subsequent functions that they called. To improve performance we added a \texttt{data} pragma around the outer loop to reduce the amount of copying between the host and the device. \\
+The code can be paralleled in two distinct sections. The first is across the frame and the second is across the path. Parallelization across the frame takes place in \hyperref[subsec:renderer.cc]{renderer.cc} in the nested for loops that iterate over each pixel of the frame. Since the pixels are all data independent of each other this was an ideal place to break off into multiple workers. We used \texttt{acc parallel loop independent private(color, to, pix\_data, farPoint)} around the outer loop and \texttt{ acc loop private(color, to, pix\_data, farPoint)} around the inner loop. Since there are calls to \texttt{local\_UnProject} (A copy of the \texttt{UnProject} function), \texttt{rayMarch} and \texttt{getColour} we needed to add \texttt{acc routine seq} to their definitions and all the subsequent functions that they called. To improve performance we added a \texttt{data} pragma around the outer loop to reduce the amount of copying between the host and the device. \\
 
 Our program has the ability to generate frames automatically, but a manual path file can also be used. Each line in the path file contains a camera position, look at vector, up vector and field of view. If a path file is given as an input argument, our program will create an array of camera parameters and generate a video frame for every camera parameter given. Since each frame is also data independent of each other we can scatter the array across MPI nodes to compute sections of the path in parallel. \\
 
