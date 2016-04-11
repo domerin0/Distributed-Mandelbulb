@@ -6,6 +6,7 @@
 \usepackage{float}
 \usepackage{tikz}
 \usepackage{fancyvrb}
+\newcommand{\inlinecode}{\texttt}
 \usepackage{hyperref}
 \usepackage[all]{hypcap}
 \newcommand\tab[1][1cm]{\hspace*{#1}}
@@ -38,6 +39,9 @@ The automatic path planner determines the next frame based on the current frame 
 
 \section{Frame Generating Algorithm}
 %(20%) Describe in sufficient detail your algorithm for generating the frames, starting from the initial time until the end of the frame generation. That is, how you select the parameters for each frame
+An automatic path planner was added to the project. To use, first the program is compiled normally, then when run it checks for a path file argument. If none is given it reads in the first line of the default path file and generates future frames based on it. 
+
+It works by computing a distance matrix, where every element in the matrix is a distance value to the corresponding pixel. It labels grey space as -1. This distance matrix, along with the previous frame's info is fed into \texttt{getNextFrame} in \hyperref[subsec:getnextframe.c]{getnextframe.c}. Inside this function, it implements a fairly naive path planning. It finds the farthest pixel in the distance matrix (that isn't gray) and moves the camTarget a small step size towards it. Then in a second function call, it moves the camPos a small step size in the direction of the new camTarget. The behaviour of this implementation is illustrated in the video linked on the title page of this report.
 
 \section{MandelBox vs MandelBulb Performance }
 %(5%) Computing a Mandelbox is generally slower than a Mandelbulb. Explain why. Include here a summary of your computations: GPU(s) used, number of frames, and seconds (in average) per frame.
@@ -54,7 +58,7 @@ CPU & AMD FX-9590 Vishera 8-Core 4.7 GHz\\
 RAM & 16GB DDR3 1600MHz\\
 GPU & Nvidia GeForce GTX TITAN X\\
 \end{tabular}
-\caption{Dominik's Desktop Specifications}
+\caption{Personal Desktop Specifications}
 \end{table}
 
 \begin{table}[h!]
@@ -70,7 +74,7 @@ Cores & Time/Frame Av. (s)  & Speed Up & Time/Frame Av. (s) & Speed Up \\
 \hline
 Titan X & 0.11 & 272.73 & 0.36 & 341.76x\\ \hline
 \end{tabular}
-\caption{Mandlebulb Performance and Speedup using Dominik's Desktop (Table: \ref{tab:dd_spec}) }
+\caption{Mandlebulb Performance and Speedup using Personal Desktop (Table: \ref{tab:dd_spec}) }
 \end{table}
 
 \section{Reproduction of Results}
@@ -661,7 +665,7 @@ void getColour(const pixelData &pixData, const RenderParams &render_params,
 }
 \end{Verbatim}
 
-\subsection{getnextframe.c}
+\subsection{getnextframe.c}\label{subsec:getnextframe.c}
 \begin{Verbatim}[fontsize= \footnotesize, tabsize=4]
 #include <stdio.h>
 #include <stdlib.h>

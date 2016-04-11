@@ -7,7 +7,7 @@
 \contentsline {section}{\numberline {5}Source Code}{4}{section.5}
 \contentsline {subsection}{\numberline {5.1}3d.cc}{4}{subsection.5.1}
 \contentsline {subsection}{\numberline {5.2}3d.h}{10}{subsection.5.2}
-\contentsline {subsection}{\numberline {5.3}camera.h}{10}{subsection.5.3}
+\contentsline {subsection}{\numberline {5.3}camera.h}{11}{subsection.5.3}
 \contentsline {subsection}{\numberline {5.4}color.h}{11}{subsection.5.4}
 \contentsline {subsection}{\numberline {5.5}distance\_est.cc}{11}{subsection.5.5}
 \contentsline {subsection}{\numberline {5.6}getcolor.cc}{11}{subsection.5.6}
@@ -18,11 +18,11 @@
 \contentsline {subsection}{\numberline {5.11}main.cc}{16}{subsection.5.11}
 \contentsline {subsection}{\numberline {5.12}makefile}{19}{subsection.5.12}
 \contentsline {subsection}{\numberline {5.13}mandelbox.h}{19}{subsection.5.13}
-\contentsline {subsection}{\numberline {5.14}mandelboxde.cc}{19}{subsection.5.14}
+\contentsline {subsection}{\numberline {5.14}mandelboxde.cc}{20}{subsection.5.14}
 \contentsline {subsection}{\numberline {5.15}print.c}{20}{subsection.5.15}
 \contentsline {subsection}{\numberline {5.16}raymarching.cc}{21}{subsection.5.16}
 \contentsline {subsection}{\numberline {5.17}renderer.cc}{22}{subsection.5.17}
 \contentsline {subsection}{\numberline {5.18}renderer.h}{24}{subsection.5.18}
 \contentsline {subsection}{\numberline {5.19}savebmp.c}{24}{subsection.5.19}
 \contentsline {subsection}{\numberline {5.20}timing.c}{24}{subsection.5.20}
-\contentsline {subsection}{\numberline {5.21}vector3d.h}{24}{subsection.5.21}
+\contentsline {subsection}{\numberline {5.21}vector3d.h}{25}{subsection.5.21}
