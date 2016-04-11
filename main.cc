@@ -32,7 +32,7 @@
 #include <unistd.h>
 
 #define MAX_FRAMES  7200
-#define AUTO_FRAMES 1
+#define AUTO_FRAMES 10
 
 void getParameters(char *filename, RenderParams *renderer_params, MandelBoxParams *mandelBox_paramsP);
 void getPath      (char *filename, CameraParams *camera_path, int *len);
@@ -50,18 +50,11 @@ int main(int argc, char** argv)
 	//struct timeval timerEnd;
 	double time_spent;
 
+	printf("timer starting\n");
 	#ifdef _OPENMP
-		int num_threads = atoi(argv[3]);
-		omp_set_num_threads(num_threads);
-		printf("num threads %d\n",num_threads);
 		double p_time;
-		printf("openMP timer starting\n");
 		p_time = omp_get_wtime();
-	//#elif _OPENACC
-	//	printf("openACC starting\n");
-	//	gettimeofday(&timerStart, NULL);
 	#else
-		printf("timer starting\n");
 		clock_t begin, end;
 		begin = clock();
 	#endif
@@ -83,7 +76,7 @@ int main(int argc, char** argv)
 		/* exists but is no dir */
 	}
 
-	assert(argc >= 2);
+	assert(argc == 2 | argc == 3);
 
 	char* path;
 	CameraParams * camera_path;
