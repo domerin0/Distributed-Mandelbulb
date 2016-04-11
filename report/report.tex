@@ -25,6 +25,7 @@
 \begin{document}
 \maketitle
 \url{https://www.youtube.com/watch?v=-fkmAzlNoks}
+
 \newpage
 \tableofcontents
 
@@ -49,7 +50,6 @@ It works by computing a distance matrix, where every element in the matrix is a 
 Performance using \hyperref[subsec:params_bulb]{params\_bulb.dat}. CPU time averaged over 10 frames and GPU time averaged over 7200 frames. Times include automated path planning and .bmp writes to a solid state hard drive after every frame. There is a consistent 20\% performance penalty from using a mechanical spinning platter hard drive regardless of whether a CPU or GPU is used to generate frames. The time to encode the frames into a video is not included in any of the tables.
 
 \vspace{0.125cm}
-
 \begin{table}[h!]
 \centering
 \label{tab:dd_spec}
@@ -1486,6 +1486,24 @@ unmodified
 \subsection{timing.c}
 \begin{Verbatim}[fontsize= \footnotesize, tabsize=4]
 unmodified
+\end{Verbatim}
+
+\subsection{make\_video.sh}
+\begin{Verbatim}[fontsize= \footnotesize, tabsize=4]
+#create title video
+ffmpeg -framerate 30 -loop 1 -i title.bmp -c:v libx264 -t 3 a.mp4
+
+#combine video frmaes to gether
+ffmpeg -framerate 30 -i frame_%04d.bmp -c:v libx264 b.mp4
+
+#join title to video
+ffmpeg -f concat -i playlist.txt -c copy no_sound.mp4
+
+#add aduio track, -shortest stops the video when the shortest stream is over (the audio track should be longer than 4min)
+ffmpeg -i conc.mp3 -i no_sound.mp4 -c copy -shortest output.mp4
+
+#clean up
+rm a.mp4 b.mp4 no_sound.mp4
 \end{Verbatim}
 
 \subsection{vector3d.h} 
